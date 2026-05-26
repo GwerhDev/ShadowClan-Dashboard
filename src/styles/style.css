@@ -1,0 +1,104 @@
+@font-face {
+  font-family: 'Diablo';
+  src: url('../assets/fonts/diablo.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.logo-styles {
+  margin: 0;
+  padding: 0;
+  font-family: Diablo;
+  color: rgb(227, 210, 168);
+  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.245));
+  transform: scale(1, 1.5);
+  display: inline-block;
+  height: 100%;
+}
+
+.divider {
+  height: 1px;
+  width: 100%;
+  background-color: rgba(255, 255, 255, .15);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.mt-0 { margin-top: 0; }
+.mb-0 { margin-bottom: 0; }
+.mt-1 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.mb-2 { margin-bottom: 2rem; }
+.mt-3 { margin-top: 3rem; }
+.mb-3 { margin-bottom: 3rem; }
+.p-0  { padding: 0; }
+.p-1  { padding: 1rem; }
+.p-2  { padding: 2rem; }
+.p-3  { padding: 3rem; }
+.pt-1 { padding-top: 1rem; }
+.pt-2 { padding-top: 2rem; }
+.pt-3 { padding-top: 3rem; }
+.pb-1 { padding-bottom: 1rem; }
+.pb-2 { padding-bottom: 2rem; }
+.pb-3 { padding-bottom: 3rem; }
+.pr-1 { padding-right: 1rem; }
+.pr-2 { padding-right: 2rem; }
+.pr-3 { padding-right: 3rem; }
+.pl-1 { padding-left: 1rem; }
+.pl-2 { padding-left: 2rem; }
+.pl-3 { padding-left: 3rem; }
+.m-0  { margin: 0; }
+
+.mw-800  { max-width: 800px; }
+.mw-1080 { max-width: 1080px; }
+.mw-1250 { max-width: 1250px; }
+.mw-2500 { max-width: 2500px; }
+
+.d-flex { display: flex; }
+.g-1    { gap: 1rem; }
+.g-small { gap: .3rem; }
+
+.border-right  { border-right: solid 1px #99938a; }
+.border-top    { border-top: solid 1px #99938a; }
+.border-top-left-radius     { border-top-left-radius: 8px; }
+.border-top-right-radius    { border-top-right-radius: 8px; }
+.border-bottom-left-radius  { border-bottom-left-radius: 8px; }
+.border-bottom-right-radius { border-bottom-right-radius: 8px; }
+
+.justify-content-center { justify-content: center; }
+.align-items-center     { align-items: center; }
+.text-align-start       { text-align: start; }
+
+.text-between-divider {
+  text-wrap: nowrap;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.featured-text {
+  color: rgb(227, 210, 168);
+  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.245));
+}
+
+.desktop {
+  display: block;
+}
+
+.mobile {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .desktop {
+    display: none;
+  }
+
+  .mobile {
+    display: flex;
+  }
+}

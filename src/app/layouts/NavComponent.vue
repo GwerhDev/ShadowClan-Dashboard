@@ -1,0 +1,58 @@
+<style scoped lang="scss" src="./NavComponent.scss" />
+<script setup lang="ts">
+import { useStore } from '../../middlewares/store';
+import { CLIENT_URL } from '../../middlewares/misc/const';
+import { useRouter } from 'vue-router';
+import LogoComponent from './LogoComponent.vue';
+
+const store = useStore();
+const router = useRouter();
+
+function goToRequests() {
+  router.push('/requests');
+}
+</script>
+
+<template>
+  <div class="nav-container">
+    <nav>
+      <section class="logo-section">
+        <LogoComponent />
+      </section>
+      <div class="nav-sections">
+        <section class="spacer"></section>
+
+        <section class="router-section">
+          <router-link title="Overview" to="/" class="nav-item">
+            <i class="fas fa-chart-line"></i>
+            <small>Overview</small>
+          </router-link>
+          <router-link title="Gestión" to="/management" class="nav-item">
+            <span class="icon-wrap">
+              <i class="fas fa-shield-halved"></i>
+              <span v-if="store.pendingRequestsCount > 0" class="notif-badge">{{ store.pendingRequestsCount }}</span>
+            </span>
+            <small>Gestión</small>
+          </router-link>
+        </section>
+
+        <section class="user-section">
+          <div class="bell-wrapper">
+            <button class="bell-btn" @click="goToRequests" title="Solicitudes">
+              <i class="fas fa-bell"></i>
+              <span v-if="store.pendingRequestsCount > 0" class="notif-badge">{{ store.pendingRequestsCount }}</span>
+            </button>
+          </div>
+
+          <a :href="CLIENT_URL" title="Ir a la aplicación">
+            <i class="fas fa-arrow-up-right-from-square"></i>
+          </a>
+
+          <button class="bell-btn" @click="store.handleLogout()" title="Cerrar sesión">
+            <i class="fas fa-right-from-bracket"></i>
+          </button>
+        </section>
+      </div>
+    </nav>
+  </div>
+</template>

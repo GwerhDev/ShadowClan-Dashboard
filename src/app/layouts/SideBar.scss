@@ -1,0 +1,112 @@
+.container-lateral {
+  margin: 0;
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  ul {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    list-style: none;
+
+    li {
+      gap: .5rem;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      align-items: center;
+
+      button {
+        gap: 1rem;
+        width: 200px;
+        height: 40px;
+        padding-inline: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: var(--color-primary-bg);
+
+        &:disabled {
+          background-color: #7e7972;
+          border: none;
+          cursor: not-allowed;
+        }
+      }
+
+      span {
+        width: 100%;
+        text-wrap: nowrap;
+        text-align: start;
+      }
+
+      .tab-badge {
+        background: var(--color-primary);
+        color: #fff;
+        font-size: .55rem;
+        font-weight: 700;
+        min-width: 16px;
+        height: 16px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        flex-shrink: 0;
+        width: auto;
+      }
+    }
+  }
+}
+
+.sidebar-bottom {
+  padding-bottom: .5rem;
+}
+
+.dashboard-btn {
+  gap: 1rem;
+  width: 200px;
+  height: 40px;
+  padding-inline: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-primary-bg);
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, .06);
+    border-color: rgba(255, 255, 255, .18);
+
+    .dashboard-ext-icon {
+      color: rgba(255, 255, 255, .7);
+    }
+  }
+}
+
+.dashboard-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  span {
+    text-wrap: nowrap;
+    text-align: start;
+  }
+}
+
+.dashboard-ext-icon {
+  font-size: .6rem;
+  color: rgba(255, 255, 255, .3);
+  transition: color .15s;
+  flex-shrink: 0;
+}

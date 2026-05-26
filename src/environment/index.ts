@@ -1,0 +1,1 @@
+export const environment: string = import.meta.env.MODE;
