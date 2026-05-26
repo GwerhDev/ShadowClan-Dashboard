@@ -28,10 +28,10 @@ function goToRequests() {
             <small>Overview</small>
           </router-link>
           <router-link title="Gestión" to="/management" class="nav-item">
-            <span class="icon-wrap">
+            <div class="nav-icon-wrap">
               <i class="fas fa-shield-halved"></i>
-              <span v-if="store.pendingRequestsCount > 0" class="notif-badge">{{ store.pendingRequestsCount }}</span>
-            </span>
+              <span v-if="store.pendingClanRequestsCount > 0" class="notif-badge">{{ store.pendingClanRequestsCount }}</span>
+            </div>
             <small>Gestión</small>
           </router-link>
         </section>
@@ -40,7 +40,7 @@ function goToRequests() {
           <div class="bell-wrapper">
             <button class="bell-btn" @click="goToRequests" title="Solicitudes">
               <i class="fas fa-bell"></i>
-              <span v-if="store.pendingRequestsCount > 0" class="notif-badge">{{ store.pendingRequestsCount }}</span>
+              <span v-if="store.pendingRequestsTotal > 0" class="notif-badge">{{ store.pendingRequestsTotal }}</span>
             </button>
           </div>
 

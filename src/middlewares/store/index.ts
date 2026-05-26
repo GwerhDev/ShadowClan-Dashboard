@@ -1,12 +1,15 @@
 import { defineStore } from 'pinia';
 import {
   getUserData, getUsers, updateUser, deleteUser,
-  getAdminCharacters, createAdminCharacter, updateAdminCharacter, deleteAdminCharacter,
+  getAdminCharacters, createAdminCharacter, updateAdminCharacter, deleteAdminCharacter, unclaimAdminCharacter, removeCharacterClan,
   getClans, createClan, updateClan, deleteClan,
-  getClanRequestsManagement, reviewClanRequest,
-  getAdminNotifications,
+  getCharacterClaims, reviewCharacterClaim,
+  getCharacterCreationRequests, reviewCharacterCreationRequest,
+  getPendingUserActivations, reviewUserActivation,
+  getClanRequestsManagement,
 } from '../services';
 import { claimCharacterAsAdmin, unclaimCharacterAsAdmin } from '../services/admin/characters';
+import { connectSocket } from '../socket';
 import { WEB_URL } from '../misc/const';
 import { logout } from '../services';
 
@@ -23,8 +26,18 @@ export const useStore = defineStore('store', {
       clans:        null as any,
       notifications: null as any,
     },
-    pendingRequestsCount: 0,
+    pendingClaimsCount: 0,
+    pendingCreationsCount: 0,
+    pendingUsersCount: 0,
+    pendingClanRequestsCount: 0,
+    lastIncomingRequest: null as any,
   }),
+
+  getters: {
+    pendingRequestsTotal(state) {
+      return state.pendingClaimsCount + state.pendingCreationsCount + state.pendingUsersCount;
+    },
+  },
 
   actions: {
     async handleUserData() {
@@ -46,6 +59,27 @@ export const useStore = defineStore('store', {
     async handleLogout() {
       await logout();
       window.location.href = WEB_URL + '/login';
+    },
+
+    initSocket() {
+      const socket = connectSocket();
+      socket.on('admin:request:new', (payload: any) => {
+        if (payload.type === 'character-claim') this.pendingClaimsCount++;
+        else if (payload.type === 'character-creation') this.pendingCreationsCount++;
+        else if (payload.type === 'user-activation') this.pendingUsersCount++;
+        this.lastIncomingRequest = { ...payload, _ts: Date.now() };
+      });
+      socket.on('clan-request:new-dashboard', () => {
+        this.pendingClanRequestsCount++;
+      });
+      socket.on('admin:user:registered', () => {
+        if (this.admin.users !== null) this.handleGetUsers();
+      });
+      socket.on('admin:user:deleted', (payload: any) => {
+        if (this.admin.users !== null) {
+          this.admin.users = (this.admin.users as any[]).filter((u: any) => String(u._id) !== String(payload.id));
+        }
+      });
     },
 
     async handleGetUsers() {
@@ -75,6 +109,16 @@ export const useStore = defineStore('store', {
 
     async handleDeleteMember(id: string) {
       await deleteAdminCharacter(id);
+    },
+
+    async handleUnclaimCharacter(id: string) {
+      await unclaimAdminCharacter(id);
+      this.admin.characters = await getAdminCharacters();
+    },
+
+    async handleRemoveCharacterClan(id: string) {
+      await removeCharacterClan(id);
+      this.admin.characters = await getAdminCharacters();
     },
 
     async handleClaimCharacterAsAdmin(formData: any) {
@@ -110,22 +154,45 @@ export const useStore = defineStore('store', {
       return response;
     },
 
-    async handleGetAdminNotifications() {
-      this.admin.notifications = await getAdminNotifications();
+    // --- Character claims ---
+    async handleGetCharacterClaims() {
+      return await getCharacterClaims();
     },
 
-    async handleGetClanRequestsManagement() {
-      return await getClanRequestsManagement();
+    async handleReviewCharacterClaim(id: string, action: 'accept' | 'reject') {
+      return await reviewCharacterClaim(id, action);
     },
 
-    async handleReviewClanRequest(id: string, action: 'accept' | 'reject') {
-      return await reviewClanRequest(id, action);
+    // --- Character creation requests ---
+    async handleGetCharacterCreationRequests() {
+      return await getCharacterCreationRequests();
     },
 
-    async handleFetchPendingRequests() {
+    async handleReviewCharacterCreationRequest(id: string, action: 'accept' | 'reject') {
+      return await reviewCharacterCreationRequest(id, action);
+    },
+
+    // --- User activations ---
+    async handleGetPendingUserActivations() {
+      return await getPendingUserActivations();
+    },
+
+    async handleReviewUserActivation(id: string, action: 'activate' | 'reject') {
+      return await reviewUserActivation(id, action);
+    },
+
+    async handleFetchPendingCounts() {
       try {
-        const requests = await getClanRequestsManagement() ?? [];
-        this.pendingRequestsCount = (requests as any[]).filter((r: any) => r.status === 'pending').length;
+        const [claims, creations, users, clanReqs] = await Promise.all([
+          getCharacterClaims().catch(() => []),
+          getCharacterCreationRequests().catch(() => []),
+          getPendingUserActivations().catch(() => []),
+          getClanRequestsManagement().catch(() => []),
+        ]);
+        this.pendingClaimsCount = (claims as any[]).filter((r: any) => r.status === 'pending').length;
+        this.pendingCreationsCount = (creations as any[]).length;
+        this.pendingUsersCount = (users as any[]).length;
+        this.pendingClanRequestsCount = (clanReqs as any[]).length;
       } catch {
         // silently ignore
       }

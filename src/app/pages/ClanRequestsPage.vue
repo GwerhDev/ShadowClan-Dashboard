@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useStore } from '../../middlewares/store';
 import AppLayout from '../layouts/AppLayout.vue';
 
 const store: any = useStore();
 
-const requests = ref<any[]>([]);
+type ViewType = 'users' | 'characters';
+const view = ref<ViewType>('users');
+
+const userActivations = ref<any[]>([]);
+const characterRequests = ref<any[]>([]);
 const loading = ref(true);
 const selected = ref<any>(null);
 const processingId = ref<string | null>(null);
@@ -13,12 +17,35 @@ const actionError = ref('');
 const showDetail = ref(false);
 
 onMounted(async () => {
-  requests.value = await store.handleGetClanRequestsManagement() ?? [];
+  const [users, claims, creations] = await Promise.all([
+    store.handleGetPendingUserActivations().catch(() => []),
+    store.handleGetCharacterClaims().catch(() => []),
+    store.handleGetCharacterCreationRequests().catch(() => []),
+  ]);
+  userActivations.value = users ?? [];
+  characterRequests.value = [
+    ...(claims ?? []).map((c: any) => ({ ...c, _requestType: 'claim' })),
+    ...(creations ?? []).map((c: any) => ({ ...c, _requestType: 'creation' })),
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   loading.value = false;
 });
 
-function selectItem(req: any) {
-  selected.value = req;
+const activeList = computed(() =>
+  view.value === 'users' ? userActivations.value : characterRequests.value
+);
+
+const usersPendingCount = computed(() => userActivations.value.length);
+const charactersPendingCount = computed(() => characterRequests.value.length);
+
+function switchView(v: ViewType) {
+  view.value = v;
+  selected.value = null;
+  actionError.value = '';
+  showDetail.value = false;
+}
+
+function selectItem(item: any) {
+  selected.value = item;
   actionError.value = '';
   showDetail.value = true;
 }
@@ -27,13 +54,25 @@ function backToList() {
   showDetail.value = false;
 }
 
-async function review(id: string, action: 'accept' | 'reject') {
+async function review(id: string, action: string) {
   processingId.value = id;
   actionError.value = '';
   try {
-    await store.handleReviewClanRequest(id, action);
-    requests.value = requests.value.filter((r: any) => r._id !== id);
-    if (store.pendingRequestsCount > 0) store.pendingRequestsCount--;
+    if (view.value === 'users') {
+      await store.handleReviewUserActivation(id, action as 'activate' | 'reject');
+      userActivations.value = userActivations.value.filter((u: any) => u._id !== id);
+      if (store.pendingUsersCount > 0) store.pendingUsersCount--;
+    } else {
+      const type = selected.value?._requestType;
+      if (type === 'claim') {
+        await store.handleReviewCharacterClaim(id, action as 'accept' | 'reject');
+        if (store.pendingClaimsCount > 0) store.pendingClaimsCount--;
+      } else {
+        await store.handleReviewCharacterCreationRequest(id, action as 'accept' | 'reject');
+        if (store.pendingCreationsCount > 0) store.pendingCreationsCount--;
+      }
+      characterRequests.value = characterRequests.value.filter((r: any) => r._id !== id);
+    }
     selected.value = null;
     showDetail.value = false;
   } catch (e: any) {
@@ -42,6 +81,37 @@ async function review(id: string, action: 'accept' | 'reject') {
     processingId.value = null;
   }
 }
+
+watch(() => store.lastIncomingRequest, (payload) => {
+  if (!payload) return;
+  if (payload.type === 'user-activation') {
+    userActivations.value.unshift({
+      _id: payload.id,
+      battletag: payload.user?.battletag,
+      role: 'user',
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    });
+  } else if (payload.type === 'character-claim') {
+    characterRequests.value.unshift({
+      _id: payload.id,
+      _requestType: 'claim',
+      user: payload.user,
+      character: payload.character,
+      createdAt: new Date().toISOString(),
+    });
+  } else if (payload.type === 'character-creation') {
+    characterRequests.value.unshift({
+      _id: payload.id,
+      _requestType: 'creation',
+      user: payload.user,
+      name: payload.character?.name,
+      currentClass: payload.character?.currentClass,
+      resonance: payload.character?.resonance,
+      createdAt: new Date().toISOString(),
+    });
+  }
+});
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -56,33 +126,49 @@ function formatDate(iso: string) {
 
           <aside class="req-sidebar">
             <div class="req-sidebar-header">
-              <h4 class="req-sidebar-label">gestión de clan</h4>
+              <h4 class="req-sidebar-label">gestión de la app</h4>
               <h2 class="req-sidebar-title">Solicitudes</h2>
+              <div class="req-type-toggle">
+                <button :class="{ active: view === 'users' }" @click="switchView('users')">
+                  Usuarios
+                  <span v-if="usersPendingCount > 0" class="toggle-badge">{{ usersPendingCount }}</span>
+                </button>
+                <button :class="{ active: view === 'characters' }" @click="switchView('characters')">
+                  Personajes
+                  <span v-if="charactersPendingCount > 0" class="toggle-badge">{{ charactersPendingCount }}</span>
+                </button>
+              </div>
             </div>
 
             <div v-if="loading" class="req-empty">Cargando...</div>
 
-            <div v-else-if="!requests.length" class="req-empty">
+            <div v-else-if="!activeList.length" class="req-empty">
               <i class="fas fa-inbox"></i>
               <p>Sin solicitudes pendientes.</p>
             </div>
 
             <ul v-else class="req-list">
               <li
-                v-for="req in requests"
-                :key="req._id"
+                v-for="item in activeList"
+                :key="item._id"
                 class="req-item"
-                :class="{ active: selected?._id === req._id }"
-                @click="selectItem(req)"
+                :class="{ active: selected?._id === item._id }"
+                @click="selectItem(item)"
               >
                 <div class="req-item-icon-wrap">
-                  <i class="fas fa-user-plus"></i>
+                  <i v-if="view === 'users'" class="fas fa-user-clock"></i>
+                  <i v-else-if="item._requestType === 'claim'" class="fas fa-link"></i>
+                  <i v-else class="fas fa-wand-sparkles"></i>
                 </div>
                 <div class="req-item-body">
-                  <span class="req-item-title">{{ req.character?.name ?? '—' }}</span>
-                  <span class="req-item-sub">{{ req.clan?.name ?? '—' }}</span>
+                  <span class="req-item-title">{{ item.user?.battletag ?? item.battletag ?? '—' }}</span>
+                  <span class="req-item-sub">
+                    <template v-if="view === 'users'">solicita activación de cuenta</template>
+                    <template v-else-if="item._requestType === 'claim'">reclama a <strong>{{ item.character?.name ?? '—' }}</strong></template>
+                    <template v-else>solicita crear <strong>{{ item.name ?? '—' }}</strong></template>
+                  </span>
                 </div>
-                <span class="req-item-date">{{ formatDate(req.createdAt) }}</span>
+                <span class="req-item-date">{{ formatDate(item.createdAt) }}</span>
               </li>
             </ul>
           </aside>
@@ -99,46 +185,129 @@ function formatDate(iso: string) {
 
             <div v-else class="req-detail-content">
               <div class="req-detail-header">
-                <div class="req-detail-type request">
-                  <i class="fas fa-user-plus"></i>
-                  <span>Solicitud de ingreso</span>
+                <div class="req-detail-type">
+                  <i v-if="view === 'users'" class="fas fa-user-clock"></i>
+                  <i v-else-if="selected._requestType === 'claim'" class="fas fa-link"></i>
+                  <i v-else class="fas fa-wand-sparkles"></i>
+                  <span v-if="view === 'users'">Activación de usuario</span>
+                  <span v-else-if="selected._requestType === 'claim'">Reclamo de personaje</span>
+                  <span v-else>Creación de personaje</span>
                 </div>
                 <span class="req-detail-date">{{ formatDate(selected.createdAt) }}</span>
               </div>
 
-              <div class="req-detail-clan">
-                <i class="fas fa-user req-clan-icon"></i>
-                <div>
-                  <h2 class="req-clan-name">{{ selected.character?.name ?? '—' }}</h2>
-                  <p class="req-clan-sub">quiere unirse a {{ selected.clan?.name ?? '—' }}</p>
+              <!-- User activation detail -->
+              <template v-if="view === 'users'">
+                <div class="req-detail-card">
+                  <div class="req-detail-player">
+                    <i class="fas fa-user"></i>
+                    <div>
+                      <span class="req-detail-card-label">Jugador</span>
+                      <span class="req-detail-card-value">{{ selected.battletag ?? '—' }}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+                <div class="req-detail-grid">
+                  <div class="req-detail-item">
+                    <span class="req-detail-label">Rol actual</span>
+                    <span class="req-detail-value">{{ selected.role ?? '—' }}</span>
+                  </div>
+                  <div class="req-detail-item">
+                    <span class="req-detail-label">Estado</span>
+                    <span class="req-detail-value">{{ selected.status ?? '—' }}</span>
+                  </div>
+                </div>
+                <p v-if="actionError" class="req-error">{{ actionError }}</p>
+                <div class="req-detail-actions">
+                  <button class="req-btn accept" :disabled="processingId === selected._id" @click="review(selected._id, 'activate')">
+                    <i class="fas fa-check"></i> Activar cuenta
+                  </button>
+                  <button class="req-btn reject" :disabled="processingId === selected._id" @click="review(selected._id, 'reject')">
+                    <i class="fas fa-times"></i> Rechazar
+                  </button>
+                </div>
+              </template>
 
-              <div class="req-detail-grid">
-                <div class="req-detail-item">
-                  <span class="req-detail-label">Jugador</span>
-                  <span class="req-detail-value">{{ selected.user?.battletag ?? '—' }}</span>
+              <!-- Character claim detail -->
+              <template v-else-if="selected._requestType === 'claim'">
+                <div class="req-detail-card">
+                  <div class="req-detail-player">
+                    <i class="fas fa-user"></i>
+                    <div>
+                      <span class="req-detail-card-label">Jugador</span>
+                      <span class="req-detail-card-value">{{ selected.user?.battletag ?? '—' }}</span>
+                    </div>
+                  </div>
+                  <div class="req-detail-arrow"><i class="fas fa-arrow-right"></i></div>
+                  <div class="req-detail-character">
+                    <i class="fas fa-sword"></i>
+                    <div>
+                      <span class="req-detail-card-label">Personaje</span>
+                      <span class="req-detail-card-value">{{ selected.character?.name ?? '—' }}</span>
+                    </div>
+                  </div>
                 </div>
-                <div v-if="selected.character?.currentClass" class="req-detail-item">
-                  <span class="req-detail-label">Clase</span>
-                  <span class="req-detail-value">{{ selected.character.currentClass }}</span>
+                <div class="req-detail-grid">
+                  <div v-if="selected.character?.currentClass" class="req-detail-item">
+                    <span class="req-detail-label">Clase</span>
+                    <span class="req-detail-value">{{ selected.character.currentClass }}</span>
+                  </div>
+                  <div v-if="selected.character?.resonance" class="req-detail-item">
+                    <span class="req-detail-label">Resonancia</span>
+                    <span class="req-detail-value">{{ selected.character.resonance }}</span>
+                  </div>
                 </div>
-                <div v-if="selected.character?.resonance" class="req-detail-item">
-                  <span class="req-detail-label">Resonancia</span>
-                  <span class="req-detail-value">{{ selected.character.resonance }}</span>
+                <p v-if="actionError" class="req-error">{{ actionError }}</p>
+                <div class="req-detail-actions">
+                  <button class="req-btn accept" :disabled="processingId === selected._id" @click="review(selected._id, 'accept')">
+                    <i class="fas fa-check"></i> Aprobar vinculación
+                  </button>
+                  <button class="req-btn reject" :disabled="processingId === selected._id" @click="review(selected._id, 'reject')">
+                    <i class="fas fa-times"></i> Rechazar
+                  </button>
                 </div>
-              </div>
+              </template>
 
-              <p v-if="actionError" class="req-error">{{ actionError }}</p>
+              <!-- Character creation request detail -->
+              <template v-else>
+                <div class="req-detail-card">
+                  <div class="req-detail-player">
+                    <i class="fas fa-user"></i>
+                    <div>
+                      <span class="req-detail-card-label">Jugador</span>
+                      <span class="req-detail-card-value">{{ selected.user?.battletag ?? '—' }}</span>
+                    </div>
+                  </div>
+                  <div class="req-detail-arrow"><i class="fas fa-arrow-right"></i></div>
+                  <div class="req-detail-character">
+                    <i class="fas fa-wand-sparkles"></i>
+                    <div>
+                      <span class="req-detail-card-label">Nuevo personaje</span>
+                      <span class="req-detail-card-value">{{ selected.name ?? '—' }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="req-detail-grid">
+                  <div v-if="selected.currentClass" class="req-detail-item">
+                    <span class="req-detail-label">Clase</span>
+                    <span class="req-detail-value">{{ selected.currentClass }}</span>
+                  </div>
+                  <div v-if="selected.resonance" class="req-detail-item">
+                    <span class="req-detail-label">Resonancia</span>
+                    <span class="req-detail-value">{{ selected.resonance }}</span>
+                  </div>
+                </div>
+                <p v-if="actionError" class="req-error">{{ actionError }}</p>
+                <div class="req-detail-actions">
+                  <button class="req-btn accept" :disabled="processingId === selected._id" @click="review(selected._id, 'accept')">
+                    <i class="fas fa-check"></i> Aprobar creación
+                  </button>
+                  <button class="req-btn reject" :disabled="processingId === selected._id" @click="review(selected._id, 'reject')">
+                    <i class="fas fa-times"></i> Rechazar
+                  </button>
+                </div>
+              </template>
 
-              <div class="req-detail-actions">
-                <button class="req-btn accept" :disabled="processingId === selected._id" @click="review(selected._id, 'accept')">
-                  <i class="fas fa-check"></i> Aceptar
-                </button>
-                <button class="req-btn reject" :disabled="processingId === selected._id" @click="review(selected._id, 'reject')">
-                  <i class="fas fa-times"></i> Rechazar
-                </button>
-              </div>
             </div>
           </div>
 
@@ -191,8 +360,47 @@ $border: rgba(255, 255, 255, .07);
 
 .req-sidebar-title {
   font-size: 1.1rem;
-  margin: 0;
+  margin: 0 0 .85rem;
   color: var(--color-app-white);
+}
+
+.req-type-toggle {
+  display: flex;
+  gap: .35rem;
+
+  button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .35rem .5rem;
+    border-radius: 6px;
+    border: 1px solid $border;
+    background: transparent;
+    color: rgba(255, 255, 255, .4);
+    font-size: .72rem;
+    cursor: pointer;
+    transition: all .15s;
+
+    &:hover { color: rgba(255, 255, 255, .7); border-color: rgba(255, 255, 255, .15); }
+
+    &.active {
+      background: $gold-dim;
+      border-color: rgba(227, 210, 168, .3);
+      color: $gold;
+    }
+  }
+}
+
+.toggle-badge {
+  background: rgba(229, 115, 115, .25);
+  color: #e57373;
+  border-radius: 10px;
+  padding: 0 .4rem;
+  font-size: .65rem;
+  font-weight: 700;
+  line-height: 1.6;
 }
 
 .req-empty {
@@ -270,6 +478,8 @@ $border: rgba(255, 255, 255, .07);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  strong { color: rgba(255, 255, 255, .65); }
 }
 
 .req-item-date {
@@ -339,12 +549,9 @@ $border: rgba(255, 255, 255, .07);
   font-family: 'Cinzel', serif;
   padding: .3rem .75rem;
   border-radius: 4px;
-
-  &.request {
-    background: $gold-dim;
-    border: 1px solid rgba(227, 210, 168, .25);
-    color: rgba(227, 210, 168, .85);
-  }
+  background: $gold-dim;
+  border: 1px solid rgba(227, 210, 168, .25);
+  color: rgba(227, 210, 168, .85);
 }
 
 .req-detail-date {
@@ -352,7 +559,7 @@ $border: rgba(255, 255, 255, .07);
   color: rgba(255, 255, 255, .3);
 }
 
-.req-detail-clan {
+.req-detail-card {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -362,23 +569,44 @@ $border: rgba(255, 255, 255, .07);
   border-radius: 10px;
 }
 
-.req-clan-icon {
-  font-size: 1.8rem;
-  color: $gold;
+.req-detail-player,
+.req-detail-character {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex: 1;
+
+  > i {
+    font-size: 1.4rem;
+    color: $gold;
+    flex-shrink: 0;
+  }
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+  }
+}
+
+.req-detail-arrow {
+  color: rgba(255, 255, 255, .2);
+  font-size: .9rem;
   flex-shrink: 0;
 }
 
-.req-clan-name {
-  margin: 0;
-  font-size: 1.3rem;
-  font-family: 'Cinzel', serif;
-  color: var(--color-app-white);
+.req-detail-card-label {
+  font-size: .6rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .35);
 }
 
-.req-clan-sub {
-  margin: .25rem 0 0;
-  font-size: .82rem;
-  color: rgba(255, 255, 255, .45);
+.req-detail-card-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-app-white);
+  font-family: 'Cinzel', serif;
 }
 
 .req-detail-grid {
@@ -474,8 +702,8 @@ $border: rgba(255, 255, 255, .07);
     }
   }
 
-  .req-detail-grid {
-    grid-template-columns: 1fr;
-  }
+  .req-detail-grid { grid-template-columns: 1fr; }
+  .req-detail-card { flex-direction: column; align-items: flex-start; gap: .75rem; }
+  .req-detail-arrow { display: none; }
 }
 </style>

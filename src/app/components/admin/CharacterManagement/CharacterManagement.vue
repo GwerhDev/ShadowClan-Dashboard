@@ -1,28 +1,24 @@
 <style scoped lang="scss" src="./CharacterManagement.scss"/>
 <script setup lang="ts">
 import { useStore } from '../../../../middlewares/store';
-import { ref, watch } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import TableComponent from '../../Tables/TableComponent.vue';
 import CharacterListCard from './CharacterListCard.vue';
 import AddCharacterModal from './AddCharacterModal.vue';
 
 const store: any = useStore();
 const showModal = ref(false);
-const loading = ref(true); // New ref for loading state
+const loading = ref(true);
 
-watch(() => store.currentUser.logged, async (isLoggedIn) => {
-  if (isLoggedIn) {
-    // Always set loading to true when we start fetching or re-evaluating data
-    loading.value = true;
-    // Only fetch if characters data is not already present or if it's explicitly null/undefined
-    await store.handleGetAdminCharacters();
-    loading.value = false; // Set loading to false after data is processed
-  } else {
-    // If not logged in, clear data and set loading to false
-    store.admin.characters = null;
-    loading.value = false;
-  }
-}, { immediate: true }); // immediate: true to run the watcher immediately on component setup
+onMounted(async () => {
+  loading.value = true;
+  await store.handleGetAdminCharacters();
+  loading.value = false;
+});
+
+onUnmounted(() => {
+  store.admin.characters = null;
+});
 
 function handleAddMember() {
   showModal.value = true;

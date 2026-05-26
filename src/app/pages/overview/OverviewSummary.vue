@@ -15,28 +15,26 @@ const stats = [
   { label: 'Usuarios registrados', icon: 'fas fa-users', value: 0 },
   { label: 'Clanes activos', icon: 'fas fa-shield-alt', value: 0 },
   { label: 'Personajes', icon: 'fas fa-user-group', value: 0 },
-  { label: 'Solicitudes', icon: 'fas fa-envelope', value: () => store.pendingRequestsCount },
+  { label: 'Solicitudes', icon: 'fas fa-envelope', value: () => store.pendingRequestsTotal },
   { label: 'Usuarios activos', icon: 'fas fa-circle-check', value: 0 },
   { label: 'Sin clan (Walker)', icon: 'fas fa-person-walking', value: 0 },
 ];
 
 const rolesData = {
-  labels: ['Walker', 'Usuario', 'Líder', 'Oficial', 'Admin'],
+  labels: ['Walker', 'Usuario', 'Admin', 'Super Admin'],
   datasets: [{
-    data: [0, 0, 0, 0, 0],
+    data: [0, 0, 0, 0],
     backgroundColor: [
       'rgba(150,150,150,.6)',
       'rgba(100,160,255,.6)',
-      'rgba(227,210,168,.6)',
-      'rgba(129,199,132,.6)',
       'rgba(229,115,115,.6)',
+      'rgba(227,210,168,.6)',
     ],
     borderColor: [
       'rgba(150,150,150,1)',
       'rgba(100,160,255,1)',
-      'rgba(227,210,168,1)',
-      'rgba(129,199,132,1)',
       'rgba(229,115,115,1)',
+      'rgba(227,210,168,1)',
     ],
     borderWidth: 1,
   }],

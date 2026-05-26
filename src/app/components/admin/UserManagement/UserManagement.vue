@@ -1,29 +1,22 @@
 <style scoped lang="scss" src="./UserManagement.scss"/>
 <script setup lang="ts">
 import { useStore } from '../../../../middlewares/store';
-import { ref, watch } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import TableComponent from '../../Tables/TableComponent.vue';
 import UserListCard from './UserListCard.vue';
 
 const store: any = useStore();
 const loading = ref(true);
 
-watch(() => store.currentUser.logged, async (isLoggedIn) => {
-  if (isLoggedIn) {
-    // Always set loading to true when we start fetching or re-evaluating data
-    loading.value = true;
-    // Only fetch if users data is not already present or if it's explicitly null/undefined
-    if (!store.admin.users) {
-      await store.handleGetUsers();
-    }
-    loading.value = false; // Set loading to false after data is processed
-  } else {
-    // If not logged in, clear data and set loading to false
-    store.admin.users = null;
-    loading.value = false;
-  }
-}, { immediate: true }); // immediate: true to run the watcher immediately on component setup
+onMounted(async () => {
+  loading.value = true;
+  await store.handleGetUsers();
+  loading.value = false;
+});
 
+onUnmounted(() => {
+  store.admin.users = null;
+});
 
 const navItems = ['status', 'battletag', 'role', 'claimed', 'actions'];
 

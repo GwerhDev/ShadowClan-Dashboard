@@ -8,7 +8,8 @@ const store = useStore();
 onMounted(async () => {
   await store.handleUserData();
   if (!store.unauthorized) {
-    await store.handleFetchPendingRequests();
+    store.initSocket();
+    await store.handleFetchPendingCounts();
   }
 });
 </script>

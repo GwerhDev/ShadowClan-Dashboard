@@ -14,7 +14,7 @@ const tabs = computed(() => [
     { id: 'characters', name: 'Personajes',  icon: 'fas fa-user-group',  path: '/characters' },
     { id: 'users',      name: 'Usuarios',    icon: 'fas fa-users',       path: '/users' },
   ] : []),
-  { id: 'requests', name: 'Solicitudes', icon: 'fas fa-envelope', path: '/requests', badge: store.pendingRequestsCount || undefined },
+  { id: 'requests', name: 'Solicitudes', icon: 'fas fa-envelope', path: '/requests', badge: store.pendingRequestsTotal || undefined },
 ]);
 </script>
 

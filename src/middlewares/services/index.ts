@@ -43,6 +43,18 @@ export const deleteAdminCharacter: any = async (id: string) => {
   await axios.delete(API_URL + '/admin/characters/' + id, { withCredentials: true });
 };
 
+export const unclaimAdminCharacter: any = async (id: string) => {
+  const response: any = await axios.patch(API_URL + '/admin/characters/' + id + '/unclaim', {}, { withCredentials: true })
+    .then(r => r.data);
+  return response;
+};
+
+export const removeCharacterClan: any = async (id: string) => {
+  const response: any = await axios.patch(API_URL + '/admin/characters/' + id + '/remove-clan', {}, { withCredentials: true })
+    .then(r => r.data);
+  return response;
+};
+
 export const updateUserData: any = async (formData: any, id: any) => {
   const response: any = await axios.patch(API_URL + '/account/update/' + id, formData, { withCredentials: true })
     .then(response => response.data)
@@ -63,7 +75,7 @@ export const getClanRequestsManagement: any = async () => {
 };
 
 export const reviewClanRequest: any = async (id: string, action: 'accept' | 'reject') => {
-  const response: any = await axios.patch(API_URL + '/clan-request/' + id, { action }, { withCredentials: true })
+  const response: any = await axios.patch(API_URL + '/admin/clan-requests/' + id, { action }, { withCredentials: true })
     .then(response => response.data);
   return response;
 };
@@ -95,4 +107,41 @@ export const logout: any = async () => {
 };
 
 export { getClans, createClan, updateClan, deleteClan } from './clanService';
+
+export const getCharacterClaims: any = async () => {
+  const response: any = await axios.get(API_URL + '/admin/character-claims', { withCredentials: true })
+    .then(response => response.data);
+  return response;
+};
+
+export const reviewCharacterClaim: any = async (id: string, action: 'accept' | 'reject') => {
+  const response: any = await axios.patch(API_URL + '/admin/character-claims/' + id, { action }, { withCredentials: true })
+    .then(response => response.data);
+  return response;
+};
+
+export const getCharacterCreationRequests: any = async () => {
+  const response: any = await axios.get(API_URL + '/admin/character-creation-requests', { withCredentials: true })
+    .then(response => response.data);
+  return response;
+};
+
+export const reviewCharacterCreationRequest: any = async (id: string, action: 'accept' | 'reject') => {
+  const response: any = await axios.patch(API_URL + '/admin/character-creation-requests/' + id, { action }, { withCredentials: true })
+    .then(response => response.data);
+  return response;
+};
+
+export const getPendingUserActivations: any = async () => {
+  const response: any = await axios.get(API_URL + '/admin/user-activations', { withCredentials: true })
+    .then(response => response.data);
+  return response;
+};
+
+export const reviewUserActivation: any = async (id: string, action: 'activate' | 'reject') => {
+  const response: any = await axios.patch(API_URL + '/admin/user-activations/' + id, { action }, { withCredentials: true })
+    .then(response => response.data);
+  return response;
+};
+
 export { getCharacterByName } from './characterService';
