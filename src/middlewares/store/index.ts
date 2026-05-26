@@ -52,6 +52,8 @@ export const useStore = defineStore('store', {
       } catch (error: any) {
         if (error?.response?.status === 401 || !error?.response) {
           window.location.href = WEB_URL + '/login';
+        } else {
+          this.unauthorized = true;
         }
       }
     },
