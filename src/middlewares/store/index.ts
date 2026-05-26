@@ -7,7 +7,7 @@ import {
   getAdminNotifications,
 } from '../services';
 import { claimCharacterAsAdmin, unclaimCharacterAsAdmin } from '../services/admin/characters';
-import { CLIENT_URL } from '../misc/const';
+import { WEB_URL } from '../misc/const';
 import { logout } from '../services';
 
 export const useStore = defineStore('store', {
@@ -38,14 +38,14 @@ export const useStore = defineStore('store', {
         }
       } catch (error: any) {
         if (error?.response?.status === 401 || !error?.response) {
-          window.location.href = CLIENT_URL + '/login';
+          window.location.href = WEB_URL + '/login';
         }
       }
     },
 
     async handleLogout() {
       await logout();
-      window.location.href = CLIENT_URL + '/login';
+      window.location.href = WEB_URL + '/login';
     },
 
     async handleGetUsers() {
