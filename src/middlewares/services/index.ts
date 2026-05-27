@@ -151,3 +151,9 @@ export const getOverviewStats: any = async () => {
     .then(r => r.data);
   return response;
 };
+
+export const getGrowthStats: any = async (range: string = '30') => {
+  const response: any = await axios.get(API_URL + '/admin/overview/growth?range=' + range, { withCredentials: true })
+    .then(r => r.data);
+  return response;
+};
