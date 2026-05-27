@@ -25,14 +25,11 @@ function handleSubmit() {
 
 <template>
   <CustomModal title="Agregar personaje" @close="$emit('close')">
-    <form @submit.prevent="handleSubmit">
-      <ul class="d-flex col g-1">
-        <LabeledInput label="Nombre del personaje" id="name" v-model="name" required />
-
-        <button type="submit" :disabled="isCharacterEmpty"
-          class="submit-button button justify-content-center align-items-center d-flex g-1 w-100">Agregar
-          Miembro</button>
-      </ul>
+    <form @submit.prevent="handleSubmit" class="modal-form">
+      <LabeledInput label="Nombre del personaje" id="name" v-model="name" required />
+      <button type="submit" :disabled="isCharacterEmpty" class="btn-submit">
+        Agregar personaje
+      </button>
     </form>
   </CustomModal>
 </template>

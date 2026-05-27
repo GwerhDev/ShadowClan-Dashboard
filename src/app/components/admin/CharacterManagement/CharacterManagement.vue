@@ -30,9 +30,12 @@ const navItems = ['estado', 'nombre', 'resonancia', 'clase', 'clan', 'acciones']
 
 <template>
   <div class="ul-container">
-    <span class="button-list">
-      <button @click="handleAddMember">Agregar personaje</button>
-    </span>
+    <div class="button-list">
+      <button class="btn-add" @click="handleAddMember">
+        <i class="fas fa-plus"></i>
+        <span>Agregar personaje</span>
+      </button>
+    </div>
     <div v-if="!loading && store.admin.characters">
       <TableComponent :navItems="navItems">
         <CharacterListCard v-for="character in store.admin.characters" :key="character._id" :character="character" />

@@ -4,7 +4,7 @@
   position: relative;
   flex-direction: column;
 
-  > div {
+  > div:not(.button-list) {
     flex: 1;
     min-height: 0;
     display: flex;
@@ -20,6 +20,29 @@
   justify-content: flex-end;
   padding-top: .5rem;
   padding-bottom: .5rem;
+}
+
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  height: 30px;
+  padding: 0 1.2rem;
+  font-size: .82rem;
+  font-weight: 400;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .15);
+  color: rgba(255, 255, 255, .6);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+
+  i { font-size: .72rem; }
+  &:hover {
+    background: rgba(255, 255, 255, .07);
+    border-color: rgba(255, 255, 255, .3);
+    color: rgba(255, 255, 255, .9);
+  }
 }
 
 .skeleton-table-container {

@@ -27,9 +27,12 @@ const navItems = ['estado', 'nombre', 'líder', 'oficiales', 'miembros', 'accion
 
 <template>
   <div class="ul-container">
-    <span class="button-list">
-      <button @click="handleAddClan">Agregar clan</button>
-    </span>
+    <div class="button-list">
+      <button class="btn-add" @click="handleAddClan">
+        <i class="fas fa-plus"></i>
+        <span>Agregar clan</span>
+      </button>
+    </div>
     <div v-if="!loading && clans">
       <TableComponent :navItems="navItems">
         <ClanListCard v-for="clan in clans" :key="clan._id" :clan="clan" />

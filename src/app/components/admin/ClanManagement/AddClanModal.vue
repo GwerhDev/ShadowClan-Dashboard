@@ -29,12 +29,11 @@ const handleSubmit = async () => {
 
 <template>
   <CustomModal title="Crear nuevo Clan" @close="$emit('close')">
-    <form @submit.prevent="handleSubmit">
-      <ul class="d-flex col g-1">
-        <LabeledInput label="Nombre del Clan" id="name" v-model="clanName" required />
-        <button type="submit" :disabled="isClanNameEmpty"
-          class="submit-button button justify-content-center align-items-center d-flex g-1 w-100">Crear Clan</button>
-      </ul>
+    <form @submit.prevent="handleSubmit" class="modal-form">
+      <LabeledInput label="Nombre del Clan" id="name" v-model="clanName" required />
+      <button type="submit" :disabled="isClanNameEmpty" class="btn-submit">
+        Crear clan
+      </button>
     </form>
   </CustomModal>
 </template>
