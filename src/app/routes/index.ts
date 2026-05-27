@@ -40,7 +40,7 @@ export default createRouter({
     {
       path: '/management',
       component: ManagementPage,
-      redirect: '/management/clans',
+      redirect: '/management/users',
       children: [
         {
           path: 'clans',

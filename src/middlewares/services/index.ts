@@ -145,3 +145,9 @@ export const reviewUserActivation: any = async (id: string, action: 'activate' |
 };
 
 export { getCharacterByName } from './characterService';
+
+export const getOverviewStats: any = async () => {
+  const response: any = await axios.get(API_URL + '/admin/overview', { withCredentials: true })
+    .then(r => r.data);
+  return response;
+};
