@@ -55,7 +55,6 @@ function handleDelete() {
       <i v-if="clan.status === 'pending'" class="fas fa-hourglass-half" :alt="clan.status" :title="clan.status"></i>
       <i v-if="clan.status === 'unclaimed'" class="fas fa-unlink" :alt="clan.status" :title="clan.status"></i>
     </span>
-
     <span>
       <input type="text" v-model="name">
     </span>
@@ -65,7 +64,10 @@ function handleDelete() {
       </span>
     </span>
     <span>
-      <input type="text" v-model="member">
+      <p>{{ clan.officer?.length ?? 0 }}</p>
+    </span>
+    <span>
+      <p class="member-count">{{ clan.totalMembers }}/100</p>
     </span>
     <span>
       <ul class="buttons-container">
@@ -91,7 +93,10 @@ function handleDelete() {
       <p>{{ clan.leader?.name }}</p>
     </span>
     <span>
-      <p>{{ clan.member }}</p>
+      <p>{{ clan.officer?.length ?? 0 }}</p>
+    </span>
+    <span>
+      <p class="member-count">{{ clan.totalMembers }}/100</p>
     </span>
     <span>
       <ul class="buttons-container">
@@ -117,7 +122,10 @@ function handleDelete() {
       <p>{{ clan.leader?.name }}</p>
     </span>
     <span>
-      <p>{{ clan.member.length }}</p>
+      <p>{{ clan.officer?.length ?? 0 }}</p>
+    </span>
+    <span>
+      <p class="member-count">{{ clan.totalMembers }}/100</p>
     </span>
     <span>
       <ul class="buttons-container">

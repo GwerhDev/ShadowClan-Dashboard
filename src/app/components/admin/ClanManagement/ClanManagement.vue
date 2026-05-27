@@ -10,7 +10,7 @@ const store: any = useStore();
 const showModal = ref(false);
 const loading = ref(true);
 
-const clans = computed(() => store.admin.clans);
+const clans = computed(() => store.admin.clans ?? []);
 
 function handleAddClan() {
   showModal.value = true;
@@ -21,7 +21,7 @@ onMounted(async () => {
   loading.value = false;
 });
 
-const navItems = ['status', 'name', 'leader', 'members', 'actions'];
+const navItems = ['estado', 'nombre', 'líder', 'oficiales', 'miembros', 'acciones'];
 
 </script>
 

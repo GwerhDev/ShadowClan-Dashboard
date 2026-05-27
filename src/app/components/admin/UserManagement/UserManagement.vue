@@ -18,7 +18,7 @@ onUnmounted(() => {
   store.admin.users = null;
 });
 
-const navItems = ['status', 'battletag', 'role', 'claimed', 'actions'];
+const navItems = ['estado', 'battletag', 'rol', 'reclamados', 'acciones'];
 
 </script>
 

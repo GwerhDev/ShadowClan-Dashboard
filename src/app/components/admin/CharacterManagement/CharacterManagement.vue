@@ -24,7 +24,7 @@ function handleAddMember() {
   showModal.value = true;
 };
 
-const navItems = ['status', 'name', 'resonance', 'class', 'clan', 'actions'];
+const navItems = ['estado', 'nombre', 'resonancia', 'clase', 'clan', 'acciones'];
 
 </script>
 
