@@ -1,8 +1,10 @@
 <style scoped lang="scss" src="./AppLayout.scss" />
 <script setup lang="ts">
 import SideBar from './SideBar.vue';
+import TabBar from './TabBar.vue';
 import diabloIcon from '../../assets/svg/diablo-icon.svg';
 import NavComponent from './NavComponent.vue';
+import NavMobileComponent from './NavMobileComponent.vue';
 import { useRoute } from 'vue-router';
 import { computed } from 'vue';
 
@@ -49,11 +51,15 @@ const dynamicTitle = computed(() => route.meta.title as string | undefined);
               <h1>{{ dynamicTitle }}</h1>
             </span>
           </div>
+          <section class="menu-section mobile" v-if="tabs && tabs.length">
+            <TabBar :tabs="tabs" />
+          </section>
           <div class="scrollable-content">
             <slot></slot>
           </div>
         </section>
       </div>
+      <NavMobileComponent />
     </div>
   </div>
 </template>

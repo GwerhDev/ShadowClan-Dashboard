@@ -1,12 +1,16 @@
 <style scoped lang="scss" src="./NavComponent.scss" />
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useStore } from '../../middlewares/store';
 import { CLIENT_URL } from '../../middlewares/misc/const';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import LogoComponent from './LogoComponent.vue';
 
 const store = useStore();
 const router = useRouter();
+const route = useRoute();
+
+const isRequestsActive = computed(() => route.path === '/requests');
 
 function goToRequests() {
   router.push('/requests');
@@ -38,7 +42,7 @@ function goToRequests() {
 
         <section class="user-section">
           <div class="bell-wrapper">
-            <button class="bell-btn" @click="goToRequests" title="Solicitudes">
+            <button class="bell-btn" :class="{ 'user-active': isRequestsActive }" @click="goToRequests" title="Solicitudes">
               <i class="fas fa-bell"></i>
               <span v-if="store.pendingRequestsTotal > 0" class="notif-badge">{{ store.pendingRequestsTotal }}</span>
             </button>
