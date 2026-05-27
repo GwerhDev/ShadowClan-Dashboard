@@ -14,11 +14,9 @@ span {
   max-width: 100px;
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: .4rem;
 
   button {
-    color: #99938a;
-    background-color: var(--color-primary-bg);
     width: 80px;
   }
 }
@@ -29,9 +27,48 @@ button {
   justify-content: center;
   overflow: hidden;
   width: 100%;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  height: 30px;
+  padding-left: .75rem;
+  padding-right: .75rem;
+  height: 28px;
+  border-radius: 6px;
+  font-size: .78rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .12);
+  color: rgba(255, 255, 255, .6);
+  transition: background .15s, border-color .15s, color .15s;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, .07);
+    border-color: rgba(255, 255, 255, .25);
+    color: rgba(255, 255, 255, .9);
+  }
+
+  &.btn-danger {
+    border-color: rgba(229, 115, 115, .3);
+    color: #e57373;
+    background: rgba(229, 115, 115, .06);
+
+    &:hover:not(:disabled) {
+      border-color: rgba(229, 115, 115, .6);
+      background: rgba(229, 115, 115, .14);
+    }
+  }
+
+  &.btn-confirm {
+    background: rgba(229, 115, 115, .15);
+    border-color: rgba(229, 115, 115, .5);
+    color: #e57373;
+  }
+
+  &.btn-primary {
+    background: rgba(0, 116, 224, .15);
+    border-color: rgba(0, 116, 224, .4);
+    color: rgba(100, 160, 255, .9);
+
+    &:hover:not(:disabled) {
+      background: rgba(0, 116, 224, .25);
+    }
+  }
 }
 
 select {
@@ -46,12 +83,18 @@ select {
 .list-container {
   width: 100%;
   display: grid;
-  padding-top: .5rem;
-  padding-bottom: .5rem;
+  padding-top: .45rem;
+  padding-bottom: .45rem;
   grid-template-columns: repeat(5, 1fr);
   align-items: center;
-  background-color: var(--color-secondary-bg);
-  border-radius: 9px;
+  background: rgba(255, 255, 255, .03);
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 8px;
+  transition: background .15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, .05);
+  }
 
   & > span:nth-child(2) {
     justify-content: flex-start;
@@ -68,17 +111,22 @@ select {
   & > span:last-child {
     position: sticky;
     right: 0;
-    background-color: var(--color-secondary-bg);
+    background: rgba(255, 255, 255, .03);
     z-index: 1;
   }
 
-  &.red-bg > span:last-child {
-    background-color: var(--color-red-action);
+  &.red-bg {
+    background: rgba(123, 41, 23, .35);
+    border-color: rgba(229, 115, 115, .25);
+
+    & > span:last-child {
+      background: rgba(123, 41, 23, .35);
+    }
   }
 }
 
 .red-bg {
-  background-color: var(--color-red-action);
+  background: rgba(123, 41, 23, .35);
 }
 
 .status-image {

@@ -39,7 +39,7 @@ import { CLIENT_URL } from '../../middlewares/misc/const';
   align-items: center;
   gap: 1.25rem;
   padding: 3rem 2.5rem;
-  background-color: var(--color-secondary-bg);
+  background: rgba(255, 255, 255, .03);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, .08);
   max-width: 480px;

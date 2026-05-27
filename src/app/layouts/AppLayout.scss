@@ -15,7 +15,6 @@
     display: flex;
     overflow: hidden;
     flex-direction: column;
-    box-shadow: 0 0 4px rgba(255, 255, 255, .15);
 
     span {
       display: flex;
@@ -32,7 +31,7 @@
 
       .menu-section {
         margin: 0;
-        border-right: solid 1px var(--element-color-primary-hover);
+        border-right: solid 1px rgba(255, 255, 255, .07);
         margin-bottom: 1rem;
       }
 

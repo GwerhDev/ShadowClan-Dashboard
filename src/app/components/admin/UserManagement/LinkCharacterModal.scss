@@ -1,17 +1,19 @@
 .member-selection-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: .75rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
 }
 
 .no-member {
   padding: 1rem;
-  border-radius: 1rem;
-  background-color: var(--element-color-primary-hover);
-  font-size: larger;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .03);
+  border: 1px solid rgba(255, 255, 255, .08);
+  font-size: .9rem;
   text-align: center;
+  color: rgba(255, 255, 255, .4);
 }
 
 .character-card-wrapper {
@@ -24,21 +26,20 @@
 
 .character-card {
   position: relative;
-  border: 1px solid var(--primary-border-color);
+  border: 1px solid rgba(255, 255, 255, .1);
   border-radius: 8px;
   padding-inline: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color .15s, background .15s;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 80px;
-  background-color: var(--element-color-primary);
+  background: rgba(255, 255, 255, .04);
 
   &:hover {
-    border-color: var(--accent-color);
-    box-shadow: 0 0 10px var(--accent-color);
-    background-color: var(--element-color-primary-hover);
+    border-color: rgba(255, 255, 255, .22);
+    background: rgba(255, 255, 255, .07);
   }
 
   .class-image {
@@ -65,13 +66,12 @@
   }
 }
 
-.character-checkbox:checked+.character-card {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--accent-color);
-  background-color: var(--element-color-primary-hover);
+.character-checkbox:checked + .character-card {
+  border-color: rgba(227, 210, 168, .5);
+  background: rgba(227, 210, 168, .07);
 
   &:hover {
-    background-color: var(--element-color-primary);
+    border-color: rgba(227, 210, 168, .7);
   }
 }
 
