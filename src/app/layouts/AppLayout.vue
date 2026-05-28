@@ -40,7 +40,9 @@ const dynamicTitle = computed(() => route.meta.title as string | undefined);
       </section>
       <div class="section-container">
         <section class="menu-section desktop" v-if="tabs && tabs.length">
-          <img :src="diabloIcon" alt="icon" />
+          <div class="sidebar-icon-wrap">
+            <img :src="diabloIcon" alt="icon" />
+          </div>
           <SideBar :tabs="tabs" />
         </section>
 
