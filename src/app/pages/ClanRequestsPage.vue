@@ -334,7 +334,6 @@ $border: rgba(255, 255, 255, .07);
   grid-template-columns: 280px 1fr;
   height: 100%;
   overflow: hidden;
-  border-left: 1px solid $border;
 }
 
 .req-sidebar {

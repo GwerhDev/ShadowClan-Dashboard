@@ -130,8 +130,11 @@
         flex-direction: column;
         text-decoration: none;
         justify-content: center;
-        border-bottom: 3px solid transparent;
-        transition: color 0.3s ease-in-out, filter 0.3s ease-in-out;
+        background-image: linear-gradient(var(--color-primary), var(--color-primary));
+        background-size: 0% 3px;
+        background-position: center bottom;
+        background-repeat: no-repeat;
+        transition: color 0.3s ease-in-out, filter 0.3s ease-in-out, background-size 0.3s ease-in-out;
 
         i {
           font-size: 1.2rem;
@@ -145,7 +148,7 @@
       .router-link-active {
         color: #e3d2a8;
         filter: drop-shadow(0 0 4px #ff00003e);
-        border-bottom: 3px solid var(--color-primary);
+        background-size: 100% 3px;
       }
     }
   }
