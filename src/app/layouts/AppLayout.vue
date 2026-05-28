@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import SideBar from './SideBar.vue';
 import TabBar from './TabBar.vue';
-import diabloIcon from '../../assets/svg/diablo-icon.svg';
+import diabloIcon from '../../assets/png/shadowclan-icon.png';
 import NavComponent from './NavComponent.vue';
 import NavMobileComponent from './NavMobileComponent.vue';
 import { useRoute } from 'vue-router';

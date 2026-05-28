@@ -5,7 +5,7 @@ import { CLIENT_URL } from '../../middlewares/misc/const';
 <template>
   <div class="unauthorized-container">
     <div class="unauthorized-card">
-      <img src="../../assets/svg/diablo-icon.svg" alt="icon" class="icon" />
+      <img src="../../assets/png/shadowclan-icon.png" alt="icon" class="icon" />
       <h1>Acceso Denegado</h1>
       <p class="main-msg">No tienes permisos para acceder al Dashboard.</p>
       <div class="warning-box">
