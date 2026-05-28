@@ -24,8 +24,6 @@ function goToRequests() {
         <LogoComponent />
       </section>
       <div class="nav-sections">
-        <section class="spacer"></section>
-
         <section class="router-section">
           <router-link title="Overview" to="/" class="nav-item">
             <i class="fas fa-chart-line"></i>
@@ -51,10 +49,6 @@ function goToRequests() {
           <a :href="CLIENT_URL" title="Ir a la aplicación">
             <i class="fas fa-arrow-up-right-from-square"></i>
           </a>
-
-          <button class="bell-btn" @click="store.handleLogout()" title="Cerrar sesión">
-            <i class="fas fa-right-from-bracket"></i>
-          </button>
         </section>
       </div>
     </nav>
