@@ -102,10 +102,10 @@ async function removeClan(id: string) {
       <span v-else class="clan-label muted">Sin clan</span>
     </span>
     <span>
-      <ul class="buttons-container">
-        <button @click="handleUpdate(character._id)">✔️</button>
-        <button @click="handleCancel">❌</button>
-      </ul>
+      <div class="buttons-container">
+        <button class="icon-button icon-button--confirm" @click="handleUpdate(character._id)" title="Guardar"><i class="fas fa-check"></i></button>
+        <button class="icon-button" @click="handleCancel" title="Cancelar"><i class="fas fa-times"></i></button>
+      </div>
     </span>
   </div>
 
@@ -130,10 +130,10 @@ async function removeClan(id: string) {
       <p v-else class="clan-label muted">Sin clan</p>
     </span>
     <span>
-      <ul class="buttons-container">
-        <button @click="handleDeleteMember(character._id)">✔️</button>
-        <button @click="handleCancel">❌</button>
-      </ul>
+      <div class="buttons-container">
+        <button class="icon-button icon-button--confirm" @click="handleDeleteMember(character._id)" title="Confirmar eliminación"><i class="fas fa-check"></i></button>
+        <button class="icon-button" @click="handleCancel" title="Cancelar"><i class="fas fa-times"></i></button>
+      </div>
     </span>
   </div>
 
@@ -159,14 +159,10 @@ async function removeClan(id: string) {
       <p v-else class="clan-label muted">Sin clan</p>
     </span>
     <span>
-      <ul class="buttons-container">
-        <button @click="handleEdit" title="Editar">
-          <img src="../../../../assets/svg/edit-icon.svg" alt="" width="18px">
-        </button>
-        <button @click="deleteActive = true" title="Eliminar">
-          <img src="../../../../assets/svg/delete-icon.svg" alt="" width="22px">
-        </button>
-      </ul>
+      <div class="buttons-container">
+        <button class="icon-button" @click="handleEdit" title="Editar"><i class="fas fa-pen"></i></button>
+        <button class="icon-button icon-button--danger" @click="deleteActive = true" title="Eliminar"><i class="fas fa-trash"></i></button>
+      </div>
     </span>
   </div>
 </template>

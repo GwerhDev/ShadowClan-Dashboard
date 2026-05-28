@@ -110,11 +110,11 @@ function styleStatus(status: string) {
       <p>{{ user.character?.length || 0 }}</p>
     </span>
     <span>
-      <ul class="buttons-container">
-        <button @click="openLinkModal"><i class="fas fa-link"></i></button>
-        <button :disabled="user.role === 'super_admin'" @click="handleUpdate(user._id)">✔️</button>
-        <button :disabled="user.role === 'super_admin'" @click="handleCancel">❌</button>
-      </ul>
+      <div class="buttons-container">
+        <button class="icon-button" @click="openLinkModal" title="Vincular personajes"><i class="fas fa-link"></i></button>
+        <button class="icon-button icon-button--confirm" :disabled="user.role === 'super_admin'" @click="handleUpdate(user._id)" title="Guardar"><i class="fas fa-check"></i></button>
+        <button class="icon-button" :disabled="user.role === 'super_admin'" @click="handleCancel" title="Cancelar"><i class="fas fa-times"></i></button>
+      </div>
     </span>
   </div>
 
@@ -136,11 +136,11 @@ function styleStatus(status: string) {
       <p>{{ user.character?.length || 0 }}</p>
     </span>
     <span>
-      <ul class="buttons-container">
-        <button @click="openLinkModal"><i class="fas fa-link"></i></button>
-        <button :disabled="user.role === 'super_admin'" @click="handleDeleteUser(user._id)">✔️</button>
-        <button :disabled="user.role === 'super_admin'" @click="handleCancel">❌</button>
-      </ul>
+      <div class="buttons-container">
+        <button class="icon-button" @click="openLinkModal" title="Vincular personajes"><i class="fas fa-link"></i></button>
+        <button class="icon-button icon-button--confirm" :disabled="user.role === 'super_admin'" @click="handleDeleteUser(user._id)" title="Confirmar eliminación"><i class="fas fa-check"></i></button>
+        <button class="icon-button" :disabled="user.role === 'super_admin'" @click="handleCancel" title="Cancelar"><i class="fas fa-times"></i></button>
+      </div>
     </span>
   </div>
 
@@ -162,16 +162,11 @@ function styleStatus(status: string) {
       <p>{{ user.character?.length || 0 }}</p>
     </span>
     <span>
-      <ul class="buttons-container">
-        <button @click="openLinkModal"><i class="fas fa-link"></i></button>
-
-        <button :disabled="user.role === 'super_admin'" @click="handleEdit">
-          <img src="../../../../assets/svg/edit-icon.svg" alt="" width="18px">
-        </button>
-        <button :disabled="user.role === 'super_admin'" @click="handleDelete">
-          <img src="../../../../assets/svg/delete-icon.svg" alt="" width="22px">
-        </button>
-      </ul>
+      <div class="buttons-container">
+        <button class="icon-button" @click="openLinkModal" title="Vincular personajes"><i class="fas fa-link"></i></button>
+        <button class="icon-button" :disabled="user.role === 'super_admin'" @click="handleEdit" title="Editar"><i class="fas fa-pen"></i></button>
+        <button class="icon-button icon-button--danger" :disabled="user.role === 'super_admin'" @click="handleDelete" title="Eliminar"><i class="fas fa-trash"></i></button>
+      </div>
     </span>
   </div>
 

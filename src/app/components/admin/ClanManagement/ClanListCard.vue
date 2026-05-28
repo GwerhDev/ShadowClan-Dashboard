@@ -70,14 +70,10 @@ function handleDelete() {
       <p class="member-count">{{ clan.totalMembers }}/100</p>
     </span>
     <span>
-      <ul class="buttons-container">
-        <button @click="handleUpdate(clan)">
-          ✔️
-        </button>
-        <button @click="handleCancel">
-          ❌
-        </button>
-      </ul>
+      <div class="buttons-container">
+        <button class="icon-button icon-button--confirm" @click="handleUpdate(clan)" title="Guardar"><i class="fas fa-check"></i></button>
+        <button class="icon-button" @click="handleCancel" title="Cancelar"><i class="fas fa-times"></i></button>
+      </div>
     </span>
   </div>
   <div class="list-container red-bg" v-if="!editionActive && deleteActive">
@@ -99,14 +95,10 @@ function handleDelete() {
       <p class="member-count">{{ clan.totalMembers }}/100</p>
     </span>
     <span>
-      <ul class="buttons-container">
-        <button @click="handleDeleteClan(clan._id)">
-          ✔️
-        </button>
-        <button @click="handleCancel">
-          ❌
-        </button>
-      </ul>
+      <div class="buttons-container">
+        <button class="icon-button icon-button--confirm" @click="handleDeleteClan(clan._id)" title="Confirmar eliminación"><i class="fas fa-check"></i></button>
+        <button class="icon-button" @click="handleCancel" title="Cancelar"><i class="fas fa-times"></i></button>
+      </div>
     </span>
   </div>
   <div class="list-container" v-if="!editionActive && !deleteActive">
@@ -128,14 +120,10 @@ function handleDelete() {
       <p class="member-count">{{ clan.totalMembers }}/100</p>
     </span>
     <span>
-      <ul class="buttons-container">
-        <button @click="handleEdit">
-          <img src="../../../../assets/svg/edit-icon.svg" alt="" width="18px">
-        </button>
-        <button @click="handleDelete">
-          <img src="../../../../assets/svg/delete-icon.svg" alt="" width="22px">
-        </button>
-      </ul>
+      <div class="buttons-container">
+        <button class="icon-button" @click="handleEdit" title="Editar"><i class="fas fa-pen"></i></button>
+        <button class="icon-button icon-button--danger" @click="handleDelete" title="Eliminar"><i class="fas fa-trash"></i></button>
+      </div>
     </span>
   </div>
 </template>
