@@ -378,6 +378,7 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
     width: 100%;
     display: flex;
     justify-content: space-evenly;
+    padding-inline: .5rem;
     align-items: center;
     p { margin: 0; font-size: .85rem; color: rgba(255,255,255,.75); }
   }
