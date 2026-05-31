@@ -136,6 +136,43 @@ input {
   }
 }
 
+.clickable {
+  cursor: pointer;
+  transition: color .15s;
+
+  &:hover { color: rgba(227, 210, 168, .9); }
+}
+
+.officer-count {
+  font-size: .88rem;
+  color: rgba(255, 255, 255, .75);
+  margin: 0;
+  padding: .15rem .5rem;
+  border-radius: 4px;
+
+  &:hover {
+    background: rgba(255, 255, 255, .06);
+  }
+}
+
+.leader-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+}
+
+.leader-name {
+  font-size: .8rem;
+  color: rgba(255, 255, 255, .75);
+}
+
+.leader-actions {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+
 .red-bg {
   background: rgba(123, 41, 23, .35);
   border-color: rgba(229, 115, 115, .25);

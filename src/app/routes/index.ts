@@ -8,6 +8,7 @@ import ClanManagement from '../components/admin/ClanManagement/ClanManagement.vu
 import CharacterManagement from '../components/admin/CharacterManagement/CharacterManagement.vue';
 import UserManagement from '../components/admin/UserManagement/UserManagement.vue';
 import ClanRequestsPage from '../pages/ClanRequestsPage.vue';
+import ClanDetailPage from '../pages/management/ClanDetailPage.vue';
 
 export default createRouter({
   history: createWebHistory(),
@@ -47,6 +48,12 @@ export default createRouter({
           name: 'Clans',
           component: ClanManagement,
           meta: { title: 'Clanes', requiresSuperAdmin: true },
+        },
+        {
+          path: 'clans/:id',
+          name: 'ClanDetail',
+          component: ClanDetailPage,
+          meta: { title: 'Detalle de Clan', requiresSuperAdmin: true },
         },
         {
           path: 'characters',

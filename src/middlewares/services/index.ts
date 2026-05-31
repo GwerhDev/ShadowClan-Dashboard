@@ -106,7 +106,7 @@ export const logout: any = async () => {
   await axios.get(API_URL + '/logout/', { withCredentials: true, maxRedirects: 0 }).catch(() => {});
 };
 
-export { getClans, createClan, updateClan, deleteClan } from './clanService';
+export { getClans, createClan, updateClan, deleteClan, getClanById, assignClanLeader, removeClanLeader, syncClanFromFile, searchCharacters } from './clanService';
 
 export const getCharacterClaims: any = async () => {
   const response: any = await axios.get(API_URL + '/admin/character-claims', { withCredentials: true })
