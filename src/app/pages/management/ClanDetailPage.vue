@@ -151,10 +151,6 @@ function roleLabel(r: string) {
 function statusIcon(s: string) {
   return s === 'claimed' ? 'fas fa-link' : s === 'pending' ? 'fas fa-hourglass-half' : 'fas fa-unlink';
 }
-function getClassName(v: string) {
-  return classes.find(c => c.value === v)?.name ?? v;
-}
-
 const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
 </script>
 
