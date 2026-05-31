@@ -158,6 +158,30 @@ export const reviewUserActivation: any = async (id: string, action: 'activate' |
 
 export { getCharacterByName } from './characterService';
 
+export const getClanClaimRequests: any = async () => {
+  const response: any = await axios.get(API_URL + '/admin/clan-claim-requests', { withCredentials: true })
+    .then(r => r.data);
+  return response;
+};
+
+export const reviewClanClaimRequest: any = async (id: string, action: 'accept' | 'reject') => {
+  const response: any = await axios.patch(API_URL + '/admin/clan-claim-requests/' + id, { action }, { withCredentials: true })
+    .then(r => r.data);
+  return response;
+};
+
+export const getClanCreationRequests: any = async () => {
+  const response: any = await axios.get(API_URL + '/admin/clan-creation-requests', { withCredentials: true })
+    .then(r => r.data);
+  return response;
+};
+
+export const reviewClanCreationRequest: any = async (id: string, action: 'accept' | 'reject') => {
+  const response: any = await axios.patch(API_URL + '/admin/clan-creation-requests/' + id, { action }, { withCredentials: true })
+    .then(r => r.data);
+  return response;
+};
+
 export const getOverviewStats: any = async () => {
   const response: any = await axios.get(API_URL + '/admin/overview', { withCredentials: true })
     .then(r => r.data);

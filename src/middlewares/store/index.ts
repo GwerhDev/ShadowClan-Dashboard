@@ -7,6 +7,8 @@ import {
   getCharacterCreationRequests, reviewCharacterCreationRequest,
   getPendingUserActivations, reviewUserActivation,
   getClanRequestsManagement,
+  getClanCreationRequests, reviewClanCreationRequest,
+  getClanClaimRequests, reviewClanClaimRequest,
 } from '../services';
 import { claimCharacterAsAdmin, unclaimCharacterAsAdmin } from '../services/admin/characters';
 import { connectSocket } from '../socket';
@@ -30,12 +32,14 @@ export const useStore = defineStore('store', {
     pendingCreationsCount: 0,
     pendingUsersCount: 0,
     pendingClanRequestsCount: 0,
+    pendingClanCreationsCount: 0,
+    pendingClanClaimsCount: 0,
     lastIncomingRequest: null as any,
   }),
 
   getters: {
     pendingRequestsTotal(state) {
-      return state.pendingClaimsCount + state.pendingCreationsCount + state.pendingUsersCount;
+      return state.pendingClaimsCount + state.pendingCreationsCount + state.pendingUsersCount + state.pendingClanCreationsCount + state.pendingClanClaimsCount;
     },
   },
 
@@ -66,9 +70,11 @@ export const useStore = defineStore('store', {
     initSocket() {
       const socket = connectSocket();
       socket.on('admin:request:new', (payload: any) => {
-        if (payload.type === 'character-claim') this.pendingClaimsCount++;
+        if      (payload.type === 'character-claim')   this.pendingClaimsCount++;
         else if (payload.type === 'character-creation') this.pendingCreationsCount++;
-        else if (payload.type === 'user-activation') this.pendingUsersCount++;
+        else if (payload.type === 'user-activation')   this.pendingUsersCount++;
+        else if (payload.type === 'clan-creation')     this.pendingClanCreationsCount++;
+        else if (payload.type === 'clan-claim')        this.pendingClanClaimsCount++;
         this.lastIncomingRequest = { ...payload, _ts: Date.now() };
       });
       socket.on('clan-request:new-dashboard', () => {
@@ -174,6 +180,23 @@ export const useStore = defineStore('store', {
       return await reviewCharacterCreationRequest(id, action);
     },
 
+    // --- Clan claim requests ---
+    async handleGetClanClaimRequests() {
+      return await getClanClaimRequests();
+    },
+    async handleReviewClanClaimRequest(id: string, action: 'accept' | 'reject') {
+      return await reviewClanClaimRequest(id, action);
+    },
+
+    // --- Clan creation requests ---
+    async handleGetClanCreationRequests() {
+      return await getClanCreationRequests();
+    },
+
+    async handleReviewClanCreationRequest(id: string, action: 'accept' | 'reject') {
+      return await reviewClanCreationRequest(id, action);
+    },
+
     // --- User activations ---
     async handleGetPendingUserActivations() {
       return await getPendingUserActivations();
@@ -195,6 +218,10 @@ export const useStore = defineStore('store', {
         this.pendingCreationsCount = (creations as any[]).length;
         this.pendingUsersCount = (users as any[]).length;
         this.pendingClanRequestsCount = (clanReqs as any[]).length;
+        const clanCreations = await getClanCreationRequests().catch(() => []);
+        this.pendingClanCreationsCount = (clanCreations as any[]).length;
+        const clanClaims = await getClanClaimRequests().catch(() => []);
+        this.pendingClanClaimsCount = (clanClaims as any[]).length;
       } catch {
         // silently ignore
       }
