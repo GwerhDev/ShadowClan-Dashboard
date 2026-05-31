@@ -1,8 +1,5 @@
 <style scoped lang="scss" src="./NavMobileComponent.scss" />
 <script setup lang="ts">
-import { useStore } from '../../middlewares/store';
-
-const store = useStore();
 </script>
 
 <template>

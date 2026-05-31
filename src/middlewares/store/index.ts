@@ -6,7 +6,6 @@ import {
   getCharacterClaims, reviewCharacterClaim,
   getCharacterCreationRequests, reviewCharacterCreationRequest,
   getPendingUserActivations, reviewUserActivation,
-  getClanRequestsManagement,
   getClanCreationRequests, reviewClanCreationRequest,
   getClanClaimRequests, reviewClanClaimRequest,
   getAdminUnclaimedClanRequests,
@@ -220,11 +219,10 @@ export const useStore = defineStore('store', {
 
     async handleFetchPendingCounts() {
       try {
-        const [claims, creations, users, clanReqs] = await Promise.all([
+        const [claims, creations, users] = await Promise.all([
           getCharacterClaims().catch(() => []),
           getCharacterCreationRequests().catch(() => []),
           getPendingUserActivations().catch(() => []),
-          getClanRequestsManagement().catch(() => []),
         ]);
         this.pendingClaimsCount = (claims as any[]).filter((r: any) => r.status === 'pending').length;
         this.pendingCreationsCount = (creations as any[]).length;
