@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useStore } from '../../middlewares/store';
+import { reviewClanRequest } from '../../middlewares/services';
 import AppLayout from '../layouts/AppLayout.vue';
 
 const store: any = useStore();
@@ -10,8 +11,9 @@ const view = ref<ViewType>('users');
 
 const userActivations = ref<any[]>([]);
 const characterRequests = ref<any[]>([]);
-const clanCreationRequests = ref<any[]>([]);
-const clanClaimRequests    = ref<any[]>([]);
+const clanCreationRequests  = ref<any[]>([]);
+const clanClaimRequests     = ref<any[]>([]);
+const clanJoinRequests      = ref<any[]>([]); // join requests for unclaimed clans
 const loading = ref(true);
 const selected = ref<any>(null);
 const processingId = ref<string | null>(null);
@@ -19,12 +21,13 @@ const actionError = ref('');
 const showDetail = ref(false);
 
 onMounted(async () => {
-  const [users, claims, creations, clanCreations, clanClaims] = await Promise.all([
+  const [users, claims, creations, clanCreations, clanClaims, clanJoins] = await Promise.all([
     store.handleGetPendingUserActivations().catch(() => []),
     store.handleGetCharacterClaims().catch(() => []),
     store.handleGetCharacterCreationRequests().catch(() => []),
     store.handleGetClanCreationRequests().catch(() => []),
     store.handleGetClanClaimRequests().catch(() => []),
+    store.handleGetAdminUnclaimedClanRequests().catch(() => []),
   ]);
   userActivations.value = users ?? [];
   characterRequests.value = [
@@ -33,6 +36,7 @@ onMounted(async () => {
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   clanCreationRequests.value = clanCreations ?? [];
   clanClaimRequests.value    = clanClaims    ?? [];
+  clanJoinRequests.value     = (clanJoins    ?? []).map((r: any) => ({ ...r, _clanReqType: 'join' }));
   loading.value = false;
 });
 
@@ -40,6 +44,7 @@ onMounted(async () => {
 const allClanRequests = computed(() => [
   ...(clanCreationRequests.value.map((r: any) => ({ ...r, _clanReqType: 'creation' }))),
   ...(clanClaimRequests.value.map((r: any) => ({ ...r, _clanReqType: 'claim' }))),
+  ...(clanJoinRequests.value),
 ].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
 
 const activeList = computed(() => {
@@ -82,6 +87,10 @@ async function review(id: string, action: string) {
         await store.handleReviewClanClaimRequest(id, action as 'accept' | 'reject');
         clanClaimRequests.value = clanClaimRequests.value.filter((r: any) => r._id !== id);
         if (store.pendingClanClaimsCount > 0) store.pendingClanClaimsCount--;
+      } else if (selected.value?._clanReqType === 'join') {
+        await reviewClanRequest(id, action as 'accept' | 'reject');
+        clanJoinRequests.value = clanJoinRequests.value.filter((r: any) => r._id !== id);
+        if (store.pendingClanRequestsCount > 0) store.pendingClanRequestsCount--;
       } else {
         await store.handleReviewClanCreationRequest(id, action as 'accept' | 'reject');
         clanCreationRequests.value = clanCreationRequests.value.filter((r: any) => r._id !== id);
@@ -145,6 +154,14 @@ watch(() => store.lastIncomingRequest, (payload) => {
       _id: payload.id, clanName: payload.clanName, requestedRole: payload.requestedRole,
       user: payload.user, createdAt: new Date().toISOString(),
     });
+  } else if (payload.type === 'clan-join-unclaimed') {
+    clanJoinRequests.value.unshift({
+      _id: payload.id, _clanReqType: 'join',
+      user: payload.user, character: payload.character, clan: payload.clan,
+      createdAt: new Date().toISOString(),
+    });
+  } else if (payload.type === 'clan-request-cancelled') {
+    clanJoinRequests.value = clanJoinRequests.value.filter((r: any) => r._id !== payload.id);
   }
 });
 
@@ -197,6 +214,7 @@ function formatDate(iso: string) {
                 <div class="req-item-icon-wrap">
                   <i v-if="view === 'users'" class="fas fa-user-clock"></i>
                   <i v-else-if="view === 'clans' && item._clanReqType === 'claim'" class="fas fa-key"></i>
+                  <i v-else-if="view === 'clans' && item._clanReqType === 'join'" class="fas fa-door-open"></i>
                   <i v-else-if="view === 'clans'" class="fas fa-shield-halved"></i>
                   <i v-else-if="item._requestType === 'claim'" class="fas fa-link"></i>
                   <i v-else class="fas fa-wand-sparkles"></i>
@@ -206,6 +224,7 @@ function formatDate(iso: string) {
                   <span class="req-item-sub">
                     <template v-if="view === 'users'">solicita activación de cuenta</template>
                     <template v-else-if="view === 'clans' && item._clanReqType === 'claim'">quiere reclamar <strong>{{ item.clanName ?? item.clan?.name ?? '—' }}</strong> como {{ item.requestedRole === 'leader' ? 'Líder' : 'Oficial' }}</template>
+                    <template v-else-if="view === 'clans' && item._clanReqType === 'join'">quiere unirse al clan <strong>{{ item.clan?.name ?? '—' }}</strong></template>
                     <template v-else-if="view === 'clans'">solicita crear clan <strong>{{ item.clanName ?? '—' }}</strong></template>
                     <template v-else-if="item._requestType === 'claim'">reclama a <strong>{{ item.character?.name ?? '—' }}</strong></template>
                     <template v-else>solicita crear <strong>{{ item.name ?? '—' }}</strong></template>
@@ -308,6 +327,42 @@ function formatDate(iso: string) {
                 <div class="req-detail-actions">
                   <button class="req-btn accept" :disabled="processingId === selected._id" @click="review(selected._id, 'accept')">
                     <i class="fas fa-check"></i> Aprobar vinculación
+                  </button>
+                  <button class="req-btn reject" :disabled="processingId === selected._id" @click="review(selected._id, 'reject')">
+                    <i class="fas fa-times"></i> Rechazar
+                  </button>
+                </div>
+              </template>
+
+              <!-- Clan join request detail (unclaimed clan) -->
+              <template v-else-if="view === 'clans' && selected._clanReqType === 'join'">
+                <div class="req-detail-card">
+                  <div class="req-detail-player">
+                    <i class="fas fa-user"></i>
+                    <div>
+                      <span class="req-detail-card-label">Jugador</span>
+                      <span class="req-detail-card-value">{{ selected.user?.battletag ?? '—' }}</span>
+                    </div>
+                  </div>
+                  <div class="req-detail-arrow"><i class="fas fa-arrow-right"></i></div>
+                  <div class="req-detail-character">
+                    <i class="fas fa-door-open"></i>
+                    <div>
+                      <span class="req-detail-card-label">Clan a unirse</span>
+                      <span class="req-detail-card-value">{{ selected.clan?.name ?? '—' }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="req-detail-grid" v-if="selected.character?.name">
+                  <div class="req-detail-item">
+                    <span class="req-detail-label">Personaje</span>
+                    <span class="req-detail-value">{{ selected.character.name }}</span>
+                  </div>
+                </div>
+                <p v-if="actionError" class="req-error">{{ actionError }}</p>
+                <div class="req-detail-actions">
+                  <button class="req-btn accept" :disabled="processingId === selected._id" @click="review(selected._id, 'accept')">
+                    <i class="fas fa-check"></i> Aprobar ingreso
                   </button>
                   <button class="req-btn reject" :disabled="processingId === selected._id" @click="review(selected._id, 'reject')">
                     <i class="fas fa-times"></i> Rechazar

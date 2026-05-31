@@ -92,6 +92,12 @@ export const reviewClanRequest: any = async (id: string, action: 'accept' | 'rej
   return response;
 };
 
+export const getAdminUnclaimedClanRequests: any = async () => {
+  const response: any = await axios.get(API_URL + '/admin/clan-requests?unclaimedOnly=true', { withCredentials: true })
+    .then(r => r.data);
+  return response;
+};
+
 export const removeClanMember: any = async (clanId: string, characterId: string) => {
   const response: any = await axios.delete(API_URL + '/clan-management/clan/' + clanId + '/members/' + characterId, { withCredentials: true })
     .then(response => response.data);

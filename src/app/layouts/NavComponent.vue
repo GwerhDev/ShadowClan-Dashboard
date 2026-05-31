@@ -32,7 +32,6 @@ function goToRequests() {
           <router-link title="Gestión" to="/management" class="nav-item">
             <div class="nav-icon-wrap">
               <i class="fas fa-shield-halved"></i>
-              <span v-if="store.pendingClanRequestsCount > 0" class="notif-badge">{{ store.pendingClanRequestsCount }}</span>
             </div>
             <small>Gestión</small>
           </router-link>
