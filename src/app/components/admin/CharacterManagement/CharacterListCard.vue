@@ -16,6 +16,7 @@ const resonance: Ref<number> = ref(0);
 const currentClass: Ref<string> = ref('');
 
 const props = defineProps(['character']);
+const emit  = defineEmits(['refresh']);
 
 onMounted(() => {
   name.value = props.character.name;
@@ -50,10 +51,12 @@ async function handleUpdate(id: string) {
   }
 
   editionActive.value = false;
+  emit('refresh');
 }
 
 async function handleDeleteMember(id: string) {
   await store.handleDeleteMember(id);
+  emit('refresh');
 }
 
 function handleCancel() {

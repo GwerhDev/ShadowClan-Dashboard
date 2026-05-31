@@ -14,6 +14,12 @@ export const getUsers: any = async () => {
   return response;
 };
 
+export const getUsersPage: any = async (params: { page: number; limit: number; q?: string }) => {
+  const response: any = await axios.get(API_URL + '/admin/users', { params, withCredentials: true })
+    .then(r => r.data);
+  return response;
+};
+
 export const updateUser: any = async (id: string, formData: any) => {
   await axios.patch(API_URL + '/admin/users/' + id, formData, { withCredentials: true });
 };
@@ -25,6 +31,12 @@ export const deleteUser: any = async (id: string) => {
 export const getAdminCharacters: any = async () => {
   const response: any = await axios.get(API_URL + '/admin/characters', { withCredentials: true })
     .then(response => response.data);
+  return response;
+};
+
+export const getAdminCharactersPage: any = async (params: { page: number; limit: number; q?: string }) => {
+  const response: any = await axios.get(API_URL + '/admin/characters', { params, withCredentials: true })
+    .then(r => r.data);
   return response;
 };
 
@@ -106,7 +118,7 @@ export const logout: any = async () => {
   await axios.get(API_URL + '/logout/', { withCredentials: true, maxRedirects: 0 }).catch(() => {});
 };
 
-export { getClans, createClan, updateClan, deleteClan, getClanById, assignClanLeader, removeClanLeader, syncClanFromFile, searchCharacters } from './clanService';
+export { getClans, getClansPage, createClan, updateClan, deleteClan, getClanById, assignClanLeader, removeClanLeader, syncClanFromFile, searchCharacters, getClanDetailMembersPage } from './clanService';
 
 export const getCharacterClaims: any = async () => {
   const response: any = await axios.get(API_URL + '/admin/character-claims', { withCredentials: true })

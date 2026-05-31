@@ -20,6 +20,7 @@ const removingLeader: Ref<boolean> = ref(false);
 const name: Ref<string> = ref('');
 
 const props = defineProps(['clan']);
+const emit  = defineEmits(['refresh']);
 
 onMounted(() => {
   name.value = props.clan.name;
@@ -32,10 +33,12 @@ function handleEdit() {
 async function handleUpdate(clan: any) {
   await store.handleUpdateClan({ _id: clan._id, name: name.value });
   editionActive.value = false;
+  emit('refresh');
 }
 
 async function handleDeleteClan(id: string) {
   await store.handleDeleteClan(id);
+  emit('refresh');
 }
 
 function handleCancel() {
@@ -49,14 +52,14 @@ function handleDelete() {
 }
 
 async function onLeaderUpdated() {
-  await store.handleGetClans();
+  emit('refresh');
 }
 
 async function handleRemoveLeader() {
   removingLeader.value = true;
   try {
     await removeClanLeader(props.clan._id);
-    await store.handleGetClans();
+    emit('refresh');
   } finally {
     removingLeader.value = false;
   }

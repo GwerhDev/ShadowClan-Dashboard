@@ -7,6 +7,12 @@ export const getClans: any = async () => {
   return response;
 };
 
+export const getClansPage: any = async (params: { page: number; limit: number; q?: string }) => {
+  const response: any = await axios.get(API_URL + "/admin/clans", { params, withCredentials: true })
+                                   .then(r => r.data)
+  return response;
+};
+
 export const createClan: any = async (formData: any) => {
   const response: any = await axios.post(API_URL + "/admin/clans", formData, { withCredentials: true })
                                    .then(response => response.data)
@@ -28,6 +34,14 @@ export const deleteClan: any = async (id: any) => {
 export const getClanById: any = async (id: string) => {
   const response: any = await axios.get(API_URL + "/admin/clans/" + id, { withCredentials: true })
                                    .then(response => response.data)
+  return response;
+};
+
+export const getClanDetailMembersPage: any = async (clanId: string, params: { page: number; limit: number; q?: string }) => {
+  const response: any = await axios.get(API_URL + "/admin/clans/" + clanId + "/members", {
+    params,
+    withCredentials: true,
+  }).then(r => r.data);
   return response;
 };
 

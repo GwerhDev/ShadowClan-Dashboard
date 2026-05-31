@@ -6,6 +6,7 @@ import LinkCharacterModal from './LinkCharacterModal.vue';
 
 const store: any = useStore();
 const props = defineProps<{ user: any }>();
+const emit  = defineEmits(['refresh']);
 
 const loading: Ref<boolean> = ref(true);
 const role: Ref<string> = ref(props.user.role);
@@ -28,15 +29,15 @@ async function handleUpdate(id: string) {
   };
 
   await store.handleUpdateUser(formData, id);
-  await store.handleGetUsers();
   await store.handleGetAdminNotifications();
   editionActive.value = false;
+  emit('refresh');
 }
 
 async function handleDeleteUser(id: string) {
   await store.handleDeleteUser(id);
-  await store.handleGetUsers();
   await store.handleGetAdminNotifications();
+  emit('refresh');
 }
 
 function handleCancel() {

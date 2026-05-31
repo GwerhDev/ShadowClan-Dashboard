@@ -1,68 +1,203 @@
 <style scoped lang="scss" src="./CharacterManagement.scss"/>
 <script setup lang="ts">
-import { useStore } from '../../../../middlewares/store';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import TableComponent from '../../Tables/TableComponent.vue';
 import CharacterListCard from './CharacterListCard.vue';
 import AddCharacterModal from './AddCharacterModal.vue';
+import { getAdminCharactersPage } from '../../../../middlewares/services';
 
-const store: any = useStore();
-const showModal = ref(false);
-const loading = ref(true);
+const showModal   = ref(false);
+const characters  = ref<any[]>([]);
+const loading     = ref(false);
+const page        = ref(1);
+const hasMore     = ref(false);
+const total       = ref(0);
+const searchQuery = ref('');
+const sentinel    = ref<HTMLElement | null>(null);
+
+let scrollObserver: IntersectionObserver | null = null;
+let searchDebounce: ReturnType<typeof setTimeout> | null = null;
+
+function scrollParent(el: HTMLElement | null): HTMLElement | null {
+  let p = el?.parentElement;
+  while (p && p !== document.documentElement) {
+    if (/(auto|scroll)/.test(getComputedStyle(p).overflowY)) return p;
+    p = p.parentElement;
+  }
+  return null;
+}
 
 onMounted(async () => {
+  await load(true);
+  const root = scrollParent(sentinel.value);
+  scrollObserver = new IntersectionObserver(([e]) => {
+    if (e.isIntersecting && hasMore.value && !loading.value) load(false);
+  }, { root, threshold: 0, rootMargin: '200px' });
+  if (sentinel.value) scrollObserver.observe(sentinel.value);
+});
+
+onUnmounted(() => scrollObserver?.disconnect());
+
+watch(searchQuery, () => {
+  if (searchDebounce) clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => load(true), 500);
+});
+
+async function load(reset: boolean) {
+  if (loading.value) return;
+  if (reset) { page.value = 1; characters.value = []; hasMore.value = false; }
   loading.value = true;
-  await store.handleGetAdminCharacters();
-  loading.value = false;
-});
-
-onUnmounted(() => {
-  store.admin.characters = null;
-});
-
-function handleAddMember() {
-  showModal.value = true;
-};
+  try {
+    const res = await getAdminCharactersPage({ page: page.value, limit: 20, q: searchQuery.value || undefined });
+    characters.value = reset ? res.data : [...characters.value, ...res.data];
+    total.value      = res.total;
+    hasMore.value    = res.hasMore;
+    if (res.hasMore) page.value++;
+  } finally {
+    loading.value = false;
+  }
+}
 
 const navItems = ['estado', 'nombre', 'resonancia', 'clase', 'clan', 'acciones'];
-
 </script>
 
 <template>
   <div class="ul-container">
     <div class="button-list">
-      <button class="btn-add" @click="handleAddMember">
+      <button class="btn-add" @click="showModal = true">
         <i class="fas fa-plus"></i>
         <span>Agregar personaje</span>
       </button>
     </div>
-    <div v-if="!loading && store.admin.characters">
-      <TableComponent :navItems="navItems">
-        <CharacterListCard v-for="character in store.admin.characters" :key="character._id" :character="character" />
-      </TableComponent>
-    </div>
-    <div v-else-if="loading" class="skeleton-table-container">
-      <div class="skeleton-table-header">
-        <div class="skeleton-box skeleton-header-item"></div>
-        <div class="skeleton-box skeleton-header-item"></div>
-        <div class="skeleton-box skeleton-header-item"></div>
-        <div class="skeleton-box skeleton-header-item"></div>
-        <div class="skeleton-box skeleton-header-item"></div>
-        <div class="skeleton-box skeleton-header-item"></div>
-        <div class="skeleton-box skeleton-header-item"></div>
-      </div>
-      <div class="skeleton-table-row" v-for="n in 5" :key="n">
-        <div class="skeleton-box skeleton-cell"></div>
-        <div class="skeleton-box skeleton-cell"></div>
-        <div class="skeleton-box skeleton-cell"></div>
-        <div class="skeleton-box skeleton-cell"></div>
-        <div class="skeleton-box skeleton-cell"></div>
-        <div class="skeleton-box skeleton-cell"></div>
-        <div class="skeleton-box skeleton-cell"></div>
-      </div>
-    </div>
-    <p v-else>No hay miembros disponibles.</p>
 
-    <AddCharacterModal v-if="showModal" @close="showModal = false" />
+    <!-- Search bar -->
+    <div class="search-bar">
+      <div class="search-wrap">
+        <i class="fas fa-magnifying-glass search-icon"></i>
+        <input v-model="searchQuery" class="search-input" placeholder="Buscar por nombre..." />
+        <button v-if="searchQuery" class="search-clear" @click="searchQuery = ''">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <span v-if="total > 0" class="total-count">
+        <i class="fas fa-user-group"></i> {{ total }}
+      </span>
+    </div>
+
+    <TableComponent
+      v-if="characters.length || loading"
+      :navItems="navItems"
+    >
+      <CharacterListCard
+        v-for="character in characters"
+        :key="character._id"
+        :character="character"
+        @refresh="load(true)"
+      />
+      <div v-if="loading" v-for="n in 5" :key="'sk' + n" class="skeleton-row">
+        <div class="skeleton-box skeleton-cell" v-for="c in 6" :key="c"></div>
+      </div>
+    </TableComponent>
+
+    <p v-else-if="!loading && searchQuery" class="empty">Sin resultados para "{{ searchQuery }}".</p>
+    <p v-else-if="!loading" class="empty">No hay personajes disponibles.</p>
+
+    <div ref="sentinel" class="sentinel"></div>
+
+    <AddCharacterModal v-if="showModal" @close="showModal = false; load(true)" />
   </div>
 </template>
+
+<style scoped lang="scss">
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .25rem 0 .75rem;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: .65rem;
+  font-size: .75rem;
+  color: rgba(255, 255, 255, .3);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  height: 30px;
+  padding: 0 2rem 0 2rem;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, .85);
+  font-size: .82rem;
+  box-sizing: border-box;
+  &:focus { outline: none; border-color: rgba(227, 210, 168, .35); }
+  &::placeholder { color: rgba(255, 255, 255, .25); }
+}
+
+.search-clear {
+  position: absolute;
+  right: .5rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, .35);
+  cursor: pointer;
+  font-size: .75rem;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  &:hover { color: rgba(255, 255, 255, .7); }
+}
+
+.total-count {
+  font-size: .75rem;
+  color: rgba(255, 255, 255, .35);
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  white-space: nowrap;
+}
+
+.skeleton-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: .75rem;
+  padding: .6rem 1rem;
+  background: rgba(255, 255, 255, .03);
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 8px;
+}
+
+.skeleton-box {
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .08);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.skeleton-cell { height: 28px; }
+
+.sentinel { height: 1px; }
+
+.empty {
+  font-size: .82rem;
+  color: rgba(255, 255, 255, .3);
+  padding: .5rem 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: .4; }
+  50%       { opacity: .9; }
+}
+</style>
