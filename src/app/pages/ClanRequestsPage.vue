@@ -138,12 +138,12 @@ watch(() => store.lastIncomingRequest, (payload) => {
   } else if (payload.type === 'clan-creation') {
     clanCreationRequests.value.unshift({
       _id: payload.id, clanName: payload.clanName,
-      user: { battletag: payload.user }, createdAt: new Date().toISOString(),
+      user: payload.user, createdAt: new Date().toISOString(),
     });
   } else if (payload.type === 'clan-claim') {
     clanClaimRequests.value.unshift({
       _id: payload.id, clanName: payload.clanName, requestedRole: payload.requestedRole,
-      user: { battletag: payload.user }, createdAt: new Date().toISOString(),
+      user: payload.user, createdAt: new Date().toISOString(),
     });
   }
 });
@@ -205,8 +205,8 @@ function formatDate(iso: string) {
                   <span class="req-item-title">{{ item.user?.battletag ?? item.battletag ?? '—' }}</span>
                   <span class="req-item-sub">
                     <template v-if="view === 'users'">solicita activación de cuenta</template>
+                    <template v-else-if="view === 'clans' && item._clanReqType === 'claim'">quiere reclamar <strong>{{ item.clanName ?? item.clan?.name ?? '—' }}</strong> como {{ item.requestedRole === 'leader' ? 'Líder' : 'Oficial' }}</template>
                     <template v-else-if="view === 'clans'">solicita crear clan <strong>{{ item.clanName ?? '—' }}</strong></template>
-                    <template v-else-if="view === 'clan-claims'">quiere reclamar <strong>{{ item.clanName ?? item.clan?.name ?? '—' }}</strong> como {{ item.requestedRole === 'leader' ? 'Líder' : 'Oficial' }}</template>
                     <template v-else-if="item._requestType === 'claim'">reclama a <strong>{{ item.character?.name ?? '—' }}</strong></template>
                     <template v-else>solicita crear <strong>{{ item.name ?? '—' }}</strong></template>
                   </span>
@@ -316,7 +316,7 @@ function formatDate(iso: string) {
               </template>
 
               <!-- Clan claim request detail -->
-              <template v-else-if="view === 'clan-claims'">
+              <template v-else-if="view === 'clans' && selected._clanReqType === 'claim'">
                 <div class="req-detail-card">
                   <div class="req-detail-player">
                     <i class="fas fa-user"></i>
