@@ -2,30 +2,34 @@
 <script setup lang="ts">
 import { classes } from '../../../../middlewares/misc/const';
 import { useStore } from '../../../../middlewares/store';
-import { Ref, onMounted, ref } from 'vue';
+import { Ref, onMounted, ref, computed } from 'vue';
+import CustomModal from '../../Modals/CustomModal.vue';
 
 const store: any = useStore();
 const editionActive: Ref<boolean> = ref(false);
-const deleteActive: Ref<boolean> = ref(false);
+const deleteActive: Ref<boolean>  = ref(false);
+const showStats:    Ref<boolean>  = ref(false);
 const characterClan = ref<any>(null);
 
-const name: Ref<string> = ref('');
-const status: Ref<string> = ref('');
-const originalStatus: Ref<string> = ref('');
-const resonance: Ref<number> = ref(0);
-const currentClass: Ref<string> = ref('');
+const name:          Ref<string> = ref('');
+const status:        Ref<string> = ref('');
+const originalStatus:Ref<string> = ref('');
+const resonance:     Ref<number> = ref(0);
+const currentClass:  Ref<string> = ref('');
 
 const props = defineProps(['character']);
 const emit  = defineEmits(['refresh']);
 
 onMounted(() => {
-  name.value = props.character.name;
-  resonance.value = props.character.resonance;
-  currentClass.value = props.character.currentClass;
-  status.value = props.character.status;
-  originalStatus.value = props.character.status;
+  name.value          = props.character.name;
+  resonance.value     = props.character.resonance;
+  currentClass.value  = props.character.currentClass;
+  status.value        = props.character.status;
+  originalStatus.value= props.character.status;
   characterClan.value = props.character.clan ?? null;
 });
+
+const displayScore = computed(() => props.character.score ?? 0);
 
 function handleEdit() { editionActive.value = true; }
 
@@ -39,7 +43,7 @@ async function handleUpdate(id: string) {
 
   if (willUnclaim) {
     await store.handleUnclaimCharacter(id);
-    characterClan.value = null;
+    characterClan.value  = null;
     originalStatus.value = 'unclaimed';
   } else {
     await store.handleUpdateAdminCharacter({
@@ -60,9 +64,9 @@ async function handleDeleteMember(id: string) {
 }
 
 function handleCancel() {
-  editionActive.value = false;
-  deleteActive.value = false;
-  status.value = originalStatus.value;
+  editionActive.value  = false;
+  deleteActive.value   = false;
+  status.value         = originalStatus.value;
 }
 
 async function removeClan(id: string) {
@@ -88,7 +92,11 @@ async function removeClan(id: string) {
       </button>
     </span>
     <span><input type="text" v-model="name"></span>
-    <span><input type="number" v-model.number="resonance"></span>
+    <span>
+      <button class="score-btn score-btn--edit" @click="showStats = true" title="Ver atributos">
+        <i class="fas fa-chart-bar"></i> Stats
+      </button>
+    </span>
     <span>
       <select v-model="currentClass">
         <option v-for="cls in classes" :key="cls.value" :value="cls.value">{{ cls.name }}</option>
@@ -120,7 +128,7 @@ async function removeClan(id: string) {
       <i v-else class="fas fa-unlink" :title="status"></i>
     </span>
     <span><p>{{ character.name }}</p></span>
-    <span><p>{{ character.resonance }}</p></span>
+    <span><p>{{ displayScore > 0 ? displayScore.toLocaleString('es') : '—' }}</p></span>
     <span>
       <ul class="class-container">
         <img :src="classes.find(cls => cls.value === character.currentClass)?.image" alt="" width="30">
@@ -148,7 +156,11 @@ async function removeClan(id: string) {
       <i v-else class="fas fa-unlink" :title="status"></i>
     </span>
     <span><p>{{ character.name }}</p></span>
-    <span><p>{{ character.resonance }}</p></span>
+    <span>
+      <button class="score-btn" @click="showStats = true" :title="'Ver atributos'">
+        {{ displayScore > 0 ? displayScore.toLocaleString('es') : '—' }}
+      </button>
+    </span>
     <span>
       <ul class="class-container">
         <img :src="classes.find(cls => cls.value === character.currentClass)?.image"
@@ -168,4 +180,99 @@ async function removeClan(id: string) {
       </div>
     </span>
   </div>
+
+  <!-- Modal stats -->
+  <CustomModal v-if="showStats" :title="character.name" @close="showStats = false">
+    <div class="stats-modal">
+      <div class="stats-row" v-for="stat in [
+        { label: 'Resonancia',  key: 'resonance'        },
+        { label: 'Armadura',    key: 'armor'             },
+        { label: 'Penetración', key: 'armorPenetration'  },
+        { label: 'Potencia',    key: 'power'             },
+        { label: 'Resistencia', key: 'resistance'        },
+      ]" :key="stat.key">
+        <span class="stats-label">{{ stat.label }}</span>
+        <span class="stats-value">
+          {{ (character[stat.key] ?? null) !== null ? Number(character[stat.key]).toLocaleString('es') : '—' }}
+        </span>
+      </div>
+      <div class="stats-total">
+        <span class="stats-label">Puntaje total</span>
+        <span class="stats-value stats-value--total">
+          {{ displayScore > 0 ? displayScore.toLocaleString('es') : '—' }}
+        </span>
+      </div>
+    </div>
+  </CustomModal>
 </template>
+
+<style scoped lang="scss">
+.score-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 5px;
+  color: rgba(255, 255, 255, .7);
+  font-size: .82rem;
+  padding: .15rem .5rem;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+
+  &:hover {
+    border-color: rgba(227, 210, 168, .4);
+    color: rgb(227, 210, 168);
+    background: rgba(227, 210, 168, .05);
+  }
+
+  &--edit {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .75rem;
+    color: rgba(227, 210, 168, .7);
+    border-color: rgba(227, 210, 168, .2);
+  }
+}
+
+.stats-modal {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  min-width: 240px;
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.stats-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: .5rem;
+}
+
+.stats-label {
+  font-size: .78rem;
+  color: rgba(255, 255, 255, .4);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.stats-value {
+  font-size: .9rem;
+  color: rgba(255, 255, 255, .8);
+  font-weight: 500;
+
+  &--total {
+    font-size: 1rem;
+    color: rgba(227, 210, 168, .9);
+    font-weight: 700;
+  }
+}
+</style>

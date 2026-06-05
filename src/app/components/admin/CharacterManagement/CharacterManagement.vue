@@ -58,7 +58,7 @@ async function load(reset: boolean) {
   }
 }
 
-const navItems = ['estado', 'nombre', 'resonancia', 'clase', 'clan', 'acciones'];
+const navItems = ['estado', 'nombre', 'puntaje', 'clase', 'clan', 'acciones'];
 </script>
 
 <template>

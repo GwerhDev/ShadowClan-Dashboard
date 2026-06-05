@@ -5,6 +5,7 @@ export interface Character {
   status?: string;
   resonance?: number | undefined | null;
   currentClass?: string;
+  score?: number | null;
 }
 
 export interface Clan {
