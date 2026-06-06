@@ -9,6 +9,8 @@ import {
   getClanCreationRequests, reviewClanCreationRequest,
   getClanClaimRequests, reviewClanClaimRequest,
   getAdminUnclaimedClanRequests,
+  getAdminNotifications,
+  getClanRequestsManagement, reviewClanRequest,
 } from '../services';
 import { claimCharacterAsAdmin, unclaimCharacterAsAdmin } from '../services/admin/characters';
 import { connectSocket } from '../socket';
@@ -215,6 +217,18 @@ export const useStore = defineStore('store', {
 
     async handleReviewUserActivation(id: string, action: 'activate' | 'reject') {
       return await reviewUserActivation(id, action);
+    },
+
+    async handleGetAdminNotifications() {
+      this.admin.notifications = await getAdminNotifications();
+    },
+
+    async handleGetClanRequestsManagement() {
+      return await getClanRequestsManagement();
+    },
+
+    async handleReviewClanRequest(id: string, action: 'accept' | 'reject') {
+      return await reviewClanRequest(id, action);
     },
 
     async handleFetchPendingCounts() {
