@@ -70,5 +70,5 @@ export const syncClanFromFile: any = async (clanId: string, file: File) => {
 export const searchCharacters: any = async (q: string) => {
   const response: any = await axios.get(API_URL + "/admin/characters?q=" + encodeURIComponent(q) + "&limit=10", { withCredentials: true })
                                    .then(response => response.data)
-  return response;
+  return response.data ?? [];
 };
