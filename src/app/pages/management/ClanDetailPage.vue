@@ -422,11 +422,16 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
   height: 26px;
   max-width: 90%;
   padding: 0 .45rem;
-  background: rgba(255,255,255,.06);
+  background: #1e1e2a;
   border: 1px solid rgba(255,255,255,.15);
   border-radius: 5px;
   color: rgba(255,255,255,.85);
   font-size: .78rem;
+
+  option {
+    background: #1e1e2a;
+    color: rgba(255,255,255,.85);
+  }
 }
 
 .edit-select--role {
