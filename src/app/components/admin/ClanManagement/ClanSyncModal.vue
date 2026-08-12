@@ -47,6 +47,12 @@ async function handleSync() {
         El archivo reemplaza los <strong>miembros</strong> del clan. Los personajes del archivo son creados o actualizados; los que no aparezcan son eliminados del clan.<br />
         Columnas requeridas: <strong>Jugador, Resonancia, Armadura, Penetracion, Potencia, Resistencia, Clase, Whatsapp</strong>.
       </p>
+      <div class="hint-attendance">
+        <i class="fas fa-calendar-check hint-attendance__icon"></i>
+        <p class="hint-attendance__text">
+          <strong>Nuevo:</strong> columnas de fecha (<em>28may</em>, <em>4jun</em>…) con valor <strong>1</strong> registran asistencia a la Guerra de Sombras de ese día.
+        </p>
+      </div>
 
       <div class="field">
         <label class="field-label">Archivo (.csv o .xlsx)</label>
@@ -96,6 +102,31 @@ async function handleSync() {
   line-height: 1.55;
 
   strong { color: rgba(255, 255, 255, .65); }
+}
+
+.hint-attendance {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .55rem .75rem;
+  background: rgba(227, 210, 168, .05);
+  border: 1px solid rgba(227, 210, 168, .15);
+  border-radius: 7px;
+
+  &__icon {
+    font-size: .8rem;
+    color: rgba(227, 210, 168, .5);
+    flex-shrink: 0;
+  }
+
+  &__text {
+    margin: 0;
+    font-size: .78rem;
+    line-height: 1.5;
+    color: rgba(227, 210, 168, .5);
+    strong { color: rgba(227, 210, 168, .75); }
+    em { font-style: normal; font-weight: 600; color: rgba(227, 210, 168, .65); }
+  }
 }
 
 .field { display: flex; flex-direction: column; gap: .35rem; }

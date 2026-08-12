@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import {
   getClanById,
   getClanDetailMembersPage,
+  updateClanMemberRole,
 } from '../../../middlewares/services';
 import {
   updateAdminCharacter,
@@ -80,6 +81,7 @@ const editingId    = ref<string | null>(null);
 const editClass    = ref('');
 const editRes      = ref<number | ''>('');
 const editStatus   = ref('');
+const editRole     = ref<'leader' | 'officer' | 'member'>('member');
 const editSaving   = ref(false);
 
 function startEdit(row: any) {
@@ -87,6 +89,7 @@ function startEdit(row: any) {
   editClass.value  = row.currentClass ?? '';
   editRes.value    = row.resonance ?? '';
   editStatus.value = row.memberStatus ?? 'activo';
+  editRole.value   = row.role ?? 'member';
 }
 
 function cancelEdit() { editingId.value = null; }
@@ -94,16 +97,25 @@ function cancelEdit() { editingId.value = null; }
 async function saveEdit(row: any) {
   editSaving.value = true;
   try {
-    await updateAdminCharacter({
-      _id:          row._id,
-      currentClass: editClass.value  || undefined,
-      resonance:    editRes.value !== '' ? Number(editRes.value) : undefined,
-      memberStatus: editStatus.value || undefined,
-    });
+    const tasks: Promise<any>[] = [
+      updateAdminCharacter({
+        _id:          row._id,
+        currentClass: editClass.value  || undefined,
+        resonance:    editRes.value !== '' ? Number(editRes.value) : undefined,
+        memberStatus: editStatus.value || undefined,
+      }),
+    ];
+    if (editRole.value !== row.role) {
+      tasks.push(updateClanMemberRole(clanId, row._id, editRole.value));
+    }
+    await Promise.all(tasks);
     row.currentClass = editClass.value  || undefined;
     row.resonance    = editRes.value !== '' ? Number(editRes.value) : undefined;
     row.memberStatus = editStatus.value;
+    row.role         = editRole.value;
     editingId.value  = null;
+    // If we promoted to leader, reload to reflect the demotion of the old leader
+    if (editRole.value === 'leader') await loadMembers(true);
   } finally { editSaving.value = false; }
 }
 
@@ -196,7 +208,13 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
         <div class="list-container" v-if="editingId === row._id">
           <span><i :class="statusIcon(row.status)" class="status-icon"></i></span>
           <span><p>{{ row.name }}</p></span>
-          <span><span :class="['role-badge', row.role]">{{ roleLabel(row.role) }}</span></span>
+          <span>
+            <select v-model="editRole" class="edit-select edit-select--role">
+              <option value="leader">Líder</option>
+              <option value="officer">Oficial</option>
+              <option value="member">Miembro</option>
+            </select>
+          </span>
           <span>
             <select v-model="editClass" class="edit-select">
               <option value="">—</option>
@@ -409,6 +427,11 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
   border-radius: 5px;
   color: rgba(255,255,255,.85);
   font-size: .78rem;
+}
+
+.edit-select--role {
+  border-color: rgba(227,210,168,.25);
+  &:focus { outline: none; border-color: rgba(227,210,168,.5); }
 }
 
 // ── Action buttons ──

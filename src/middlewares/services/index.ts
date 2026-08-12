@@ -124,7 +124,7 @@ export const logout: any = async () => {
   await axios.get(API_URL + '/logout/', { withCredentials: true, maxRedirects: 0 }).catch(() => {});
 };
 
-export { getClans, getClansPage, createClan, updateClan, deleteClan, getClanById, assignClanLeader, removeClanLeader, syncClanFromFile, searchCharacters, getClanDetailMembersPage } from './clanService';
+export { getClans, getClansPage, createClan, updateClan, deleteClan, getClanById, assignClanLeader, removeClanLeader, syncClanFromFile, searchCharacters, getClanDetailMembersPage, updateClanMemberRole } from './clanService';
 
 export const getCharacterClaims: any = async () => {
   const response: any = await axios.get(API_URL + '/admin/character-claims', { withCredentials: true })

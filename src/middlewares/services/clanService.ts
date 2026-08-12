@@ -72,3 +72,9 @@ export const searchCharacters: any = async (q: string) => {
                                    .then(response => response.data)
   return response.data ?? [];
 };
+
+export const updateClanMemberRole: any = async (clanId: string, memberId: string, role: 'leader' | 'officer' | 'member') => {
+  const response: any = await axios.patch(API_URL + "/admin/clans/" + clanId + "/members/" + memberId + "/role", { role }, { withCredentials: true })
+                                   .then(r => r.data);
+  return response;
+};
