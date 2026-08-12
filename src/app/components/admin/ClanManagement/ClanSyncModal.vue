@@ -54,9 +54,14 @@ async function handleSync() {
       </div>
 
       <button class="btn-sync" :disabled="loading || !file" @click="handleSync">
-        <i class="fas fa-rotate"></i>
+        <i :class="['fas', 'fa-rotate', { 'fa-spin': loading }]"></i>
         {{ loading ? 'Sincronizando...' : 'Sincronizar' }}
       </button>
+
+      <div v-if="loading" class="progress-wrap">
+        <div class="progress-bar" />
+        <span class="progress-label">Procesando archivo, puede tomar unos segundos…</span>
+      </div>
 
       <p v-if="error" class="error">{{ error }}</p>
 
@@ -146,6 +151,41 @@ async function handleSync() {
   }
 
   &:disabled { opacity: .4; cursor: not-allowed; }
+}
+
+.progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.progress-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .07);
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: -40%;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(227, 210, 168, .7), transparent);
+    animation: progress-shimmer 1.4s ease-in-out infinite;
+  }
+}
+
+.progress-label {
+  font-size: .72rem;
+  color: rgba(255, 255, 255, .3);
+  text-align: center;
+}
+
+@keyframes progress-shimmer {
+  0%   { left: -40%; }
+  100% { left: 100%; }
 }
 
 .error {
