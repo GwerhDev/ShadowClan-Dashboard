@@ -105,6 +105,9 @@ input {
     overflow: hidden;
 
     p {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--color-app-white, #fff);
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -146,8 +149,8 @@ input {
 }
 
 .officer-count {
-  font-size: .88rem;
-  color: rgba(255, 255, 255, .75);
+  font-size: .78rem;
+  color: rgba(255, 255, 255, .5);
   margin: 0;
   padding: .15rem .5rem;
   border-radius: 4px;
@@ -165,8 +168,8 @@ input {
 }
 
 .leader-name {
-  font-size: .8rem;
-  color: rgba(255, 255, 255, .75);
+  font-size: .78rem;
+  color: rgba(255, 255, 255, .5);
 }
 
 .leader-actions {
