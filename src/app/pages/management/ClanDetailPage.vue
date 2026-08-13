@@ -207,7 +207,7 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
         <!-- Edit mode -->
         <div class="list-container" v-if="editingId === row._id">
           <span><i :class="statusIcon(row.status)" class="status-icon"></i></span>
-          <span><p>{{ row.name }}</p></span>
+          <span><p class="member-name">{{ row.name }}</p></span>
           <span>
             <select v-model="editRole" class="edit-select edit-select--role">
               <option value="leader">Líder</option>
@@ -233,10 +233,10 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
         <!-- Normal mode -->
         <div class="list-container" v-else>
           <span><i :class="statusIcon(row.status)" class="status-icon" :title="row.status"></i></span>
-          <span><p>{{ row.name }}</p></span>
+          <span><p class="member-name">{{ row.name }}</p></span>
           <span><span :class="['role-badge', row.role]">{{ roleLabel(row.role) }}</span></span>
           <span><ClassIcon :value="row.currentClass" /></span>
-          <span><p>{{ row.resonance ?? '—' }}</p></span>
+          <span><p class="member-stat">{{ row.resonance ?? '—' }}</p></span>
           <span>
             <div class="buttons-container">
               <button class="icon-button" @click="startEdit(row)" title="Editar"><i class="fas fa-pen"></i></button>
@@ -398,8 +398,19 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
     justify-content: space-evenly;
     padding-inline: .5rem;
     align-items: center;
-    p { margin: 0; font-size: .85rem; color: rgba(255,255,255,.75); }
+    p { margin: 0; }
   }
+}
+
+.member-name {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--color-app-white, #fff);
+}
+
+.member-stat {
+  font-size: .78rem;
+  color: rgba(255, 255, 255, .5);
 }
 
 .status-icon { font-size: .85rem; color: rgba(255,255,255,.4); }
@@ -408,12 +419,12 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
   font-size: .68rem;
   padding: .15rem .5rem;
   border-radius: 4px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .05em;
-  &.leader  { background: rgba(227,210,168,.15); color: rgb(227,210,168);   border: 1px solid rgba(227,210,168,.3); }
-  &.officer { background: rgba(147,197,253,.1);  color: #93c5fd;            border: 1px solid rgba(147,197,253,.25); }
-  &.member  { background: rgba(255,255,255,.06); color: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.1); }
+  &.leader  { background: rgba(200, 160, 60, .2);  color: #c8a03c; }
+  &.officer { background: rgba(100, 140, 220, .2); color: #7aa0e0; }
+  &.member  { background: rgba(255, 255, 255, .06); color: rgba(255, 255, 255, .5); }
 }
 
 // ── Edit inputs ──
