@@ -389,7 +389,7 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
 .list-container {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(80px, 1fr));
   align-items: center;
   padding: .45rem 0;
   background: rgba(255,255,255,.03);
@@ -489,7 +489,7 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
 .skeleton-member-row {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(80px, 1fr));
   align-items: center;
   gap: .75rem;
   padding: .6rem 1rem;

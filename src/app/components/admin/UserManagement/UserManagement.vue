@@ -118,7 +118,7 @@ const navItems = ['estado', 'battletag', 'rol', 'personajes', 'acciones'];
   display: flex; align-items: center; gap: .35rem; white-space: nowrap;
 }
 .skeleton-row {
-  width: 100%; display: grid; grid-template-columns: repeat(5, 1fr);
+  width: 100%; display: grid; grid-template-columns: repeat(5, minmax(80px, 1fr));
   gap: .75rem; padding: .6rem 1rem;
   background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 8px;
 }

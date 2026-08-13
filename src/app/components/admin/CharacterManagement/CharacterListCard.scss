@@ -89,7 +89,7 @@ input {
   display: grid;
   padding-top: .45rem;
   padding-bottom: .45rem;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(80px, 1fr));
   align-items: center;
   background: rgba(255, 255, 255, .03);
   border: 1px solid rgba(255, 255, 255, .07);
@@ -185,20 +185,6 @@ input {
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-}
-
-.clan-remove-btn {
-  background: transparent;
-  border: none;
-  color: rgba(229, 115, 115, .7);
-  cursor: pointer;
-  padding: 0 .25rem;
-  height: auto;
-  width: auto;
-  min-width: unset;
-
-  &:hover { color: #e57373; }
-  i { font-size: .75rem; }
 }
 
 .whatsapp-icon {

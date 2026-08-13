@@ -4,11 +4,13 @@ import { classes } from '../../../../middlewares/misc/const';
 import { useStore } from '../../../../middlewares/store';
 import { Ref, onMounted, ref, computed } from 'vue';
 import CustomModal from '../../Modals/CustomModal.vue';
+import LinkUserModal from './LinkUserModal.vue';
 
 const store: any = useStore();
 const editionActive: Ref<boolean> = ref(false);
 const deleteActive: Ref<boolean>  = ref(false);
 const showStats:    Ref<boolean>  = ref(false);
+const showLinkUser: Ref<boolean>  = ref(false);
 const characterClan = ref<any>(null);
 
 const name:          Ref<string> = ref('');
@@ -106,8 +108,8 @@ async function removeClan(id: string) {
       <span v-if="characterClan?.name" class="clan-edit-row">
         <i class="fas fa-shield-halved"></i>
         <span class="clan-edit-name">{{ characterClan.name }}</span>
-        <button type="button" class="clan-remove-btn" @click="removeClan(character._id)" title="Quitar del clan">
-          <i class="fas fa-trash"></i>
+        <button type="button" class="icon-button icon-button--danger" @click="removeClan(character._id)" title="Quitar del clan">
+          <i class="fas fa-link-slash"></i>
         </button>
       </span>
       <span v-else class="clan-label muted">Sin clan</span>
@@ -175,11 +177,26 @@ async function removeClan(id: string) {
     </span>
     <span>
       <div class="buttons-container">
+        <button
+          v-if="status !== 'claimed'"
+          class="icon-button"
+          @click="showLinkUser = true"
+          title="Vincular a usuario"
+        ><i class="fas fa-user-plus"></i></button>
         <button class="icon-button" @click="handleEdit" title="Editar"><i class="fas fa-pen"></i></button>
         <button class="icon-button icon-button--danger" @click="deleteActive = true" title="Eliminar"><i class="fas fa-trash"></i></button>
       </div>
     </span>
   </div>
+
+  <!-- Modal vincular a usuario -->
+  <LinkUserModal
+    v-if="showLinkUser"
+    :character-id="character._id"
+    :character-name="character.name"
+    @close="showLinkUser = false"
+    @updated="() => { showLinkUser = false; emit('refresh'); }"
+  />
 
   <!-- Modal stats -->
   <CustomModal v-if="showStats" :title="character.name" @close="showStats = false">

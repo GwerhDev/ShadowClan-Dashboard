@@ -93,7 +93,7 @@ select {
   display: grid;
   padding-top: .45rem;
   padding-bottom: .45rem;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(80px, 1fr));
   align-items: center;
   background: rgba(255, 255, 255, .03);
   border: 1px solid rgba(255, 255, 255, .07);
@@ -145,6 +145,13 @@ select {
 .char-count {
   font-size: .78rem;
   color: rgba(255, 255, 255, .5);
+
+  &.clickable {
+    cursor: pointer;
+    transition: color .15s;
+
+    &:hover { color: rgba(227, 210, 168, .9); }
+  }
 }
 
 // Rol de plataforma (walker/user/leader/officer/admin/super_admin) — distinto del rol

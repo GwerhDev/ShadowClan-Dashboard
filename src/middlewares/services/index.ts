@@ -40,6 +40,13 @@ export const getAdminCharactersPage: any = async (params: { page: number; limit:
   return response;
 };
 
+export const getAdminCharactersByIds: any = async (ids: string[]) => {
+  if (!ids.length) return [];
+  const response: any = await axios.get(API_URL + '/admin/characters', { params: { ids: ids.join(',') }, withCredentials: true })
+    .then(r => r.data);
+  return response.data ?? [];
+};
+
 export const createAdminCharacter: any = async (formData: any) => {
   const response: any = await axios.post(API_URL + '/admin/characters', formData, { withCredentials: true })
     .then(response => response.data);

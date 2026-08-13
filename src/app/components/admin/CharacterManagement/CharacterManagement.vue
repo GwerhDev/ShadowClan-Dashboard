@@ -172,7 +172,7 @@ const navItems = ['estado', 'nombre', 'puntaje', 'clase', 'clan', 'acciones'];
 .skeleton-row {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(80px, 1fr));
   gap: .75rem;
   padding: .6rem 1rem;
   background: rgba(255, 255, 255, .03);

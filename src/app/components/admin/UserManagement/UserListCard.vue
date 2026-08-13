@@ -3,12 +3,12 @@
 import { useStore } from '../../../../middlewares/store';
 import { Ref, ref } from 'vue';
 import LinkCharacterModal from './LinkCharacterModal.vue';
+import UserCharactersModal from './UserCharactersModal.vue';
 
 const store: any = useStore();
 const props = defineProps<{ user: any }>();
 const emit  = defineEmits(['refresh']);
 
-const loading: Ref<boolean> = ref(true);
 const role: Ref<string> = ref(props.user.role);
 const status: Ref<string> = ref(props.user.status);
 const character: Ref<string[]> = ref(props.user.character || []);
@@ -16,6 +16,7 @@ const character: Ref<string[]> = ref(props.user.character || []);
 const editionActive = ref(false);
 const deleteActive = ref(false);
 const isModalOpen = ref(false);
+const isCharsModalOpen = ref(false);
 
 function handleEdit() {
   editionActive.value = true;
@@ -53,18 +54,22 @@ function handleDelete() {
   deleteActive.value = true;
 }
 
-async function openLinkModal() {
-  await store.handleGetAdminCharacters();
-  loading.value = false;
+function openLinkModal() {
   isModalOpen.value = true;
 }
 
 function handleModalClose() {
   isModalOpen.value = false;
+  emit('refresh');
 }
 
 function handleModalSave(selectedIds: string[]) {
   character.value = selectedIds;
+}
+
+function openCharsModal() {
+  if (!props.user.character?.length) return;
+  isCharsModalOpen.value = true;
 }
 
 function roleLabel(r: string) {
@@ -116,7 +121,12 @@ function styleStatus(status: string) {
       <span v-else :class="['role-badge', user.role]">{{ roleLabel(user.role) }}</span>
     </span>
     <span>
-      <p class="char-count">{{ user.character?.length || 0 }}</p>
+      <p
+        class="char-count"
+        :class="{ clickable: user.character?.length }"
+        title="Ver personajes vinculados"
+        @click="openCharsModal"
+      >{{ user.character?.length || 0 }}</p>
     </span>
     <span>
       <div class="buttons-container">
@@ -142,7 +152,12 @@ function styleStatus(status: string) {
       <span :class="['role-badge', user.role]">{{ roleLabel(user.role) }}</span>
     </span>
     <span>
-      <p class="char-count">{{ user.character?.length || 0 }}</p>
+      <p
+        class="char-count"
+        :class="{ clickable: user.character?.length }"
+        title="Ver personajes vinculados"
+        @click="openCharsModal"
+      >{{ user.character?.length || 0 }}</p>
     </span>
     <span>
       <div class="buttons-container">
@@ -168,7 +183,12 @@ function styleStatus(status: string) {
       <span :class="['role-badge', user.role]">{{ roleLabel(user.role) }}</span>
     </span>
     <span>
-      <p class="char-count">{{ user.character?.length || 0 }}</p>
+      <p
+        class="char-count"
+        :class="{ clickable: user.character?.length }"
+        title="Ver personajes vinculados"
+        @click="openCharsModal"
+      >{{ user.character?.length || 0 }}</p>
     </span>
     <span>
       <div class="buttons-container">
@@ -179,6 +199,13 @@ function styleStatus(status: string) {
     </span>
   </div>
 
-  <LinkCharacterModal :user-id="user._id" :loading="loading" v-if="isModalOpen" :initial-selected-ids="character"
+  <LinkCharacterModal :user-id="user._id" v-if="isModalOpen" :initial-selected-ids="character"
     :user-name="user.battletag" @close="handleModalClose" @save="handleModalSave" />
+
+  <UserCharactersModal
+    v-if="isCharsModalOpen"
+    :character-ids="user.character || []"
+    :user-name="user.battletag"
+    @close="isCharsModalOpen = false"
+  />
 </template>
