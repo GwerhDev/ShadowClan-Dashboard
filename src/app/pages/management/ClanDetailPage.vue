@@ -160,6 +160,13 @@ async function confirmLink(user: any) {
 function roleLabel(r: string) {
   return r === 'leader' ? 'Líder' : r === 'officer' ? 'Oficial' : 'Miembro';
 }
+function platformRoleLabel(r: string) {
+  const labels: Record<string, string> = {
+    walker: 'Walker', user: 'Usuario', leader: 'Líder',
+    officer: 'Oficial', admin: 'Admin', super_admin: 'Super Admin',
+  };
+  return labels[r] ?? r;
+}
 function statusIcon(s: string) {
   return s === 'claimed' ? 'fas fa-link' : s === 'pending' ? 'fas fa-hourglass-half' : 'fas fa-unlink';
 }
@@ -279,7 +286,7 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
           @click="!linkSaving && confirmLink(u)"
         >
           <span class="user-tag">{{ u.battletag }}</span>
-          <span class="user-role">{{ u.role }}</span>
+          <span :class="['platform-role-badge', u.role]">{{ platformRoleLabel(u.role) }}</span>
         </li>
       </ul>
       <p v-if="linkError" class="link-error">{{ linkError }}</p>
@@ -550,7 +557,26 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
 }
 
 .user-tag { font-size: .86rem; color: rgba(255,255,255,.85); }
-.user-role { font-size: .72rem; color: rgba(255,255,255,.3); font-style: italic; }
+
+// Rol de plataforma (walker/user/leader/officer/admin/super_admin) — distinto del rol
+// de clan (.role-badge, más arriba), con su propia paleta para no confundir ambos conceptos.
+.platform-role-badge {
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: .15rem .5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+
+  &.walker      { background: rgba(255, 255, 255, .06);  color: rgba(255, 255, 255, .5); }
+  &.user        { background: rgba(147, 197, 253, .15);  color: #93c5fd; }
+  &.leader      { background: rgba(200, 160, 60, .2);    color: #c8a03c; }
+  &.officer     { background: rgba(100, 140, 220, .2);   color: #7aa0e0; }
+  &.admin       { background: rgba(251, 146, 60, .18);   color: #fb923c; }
+  &.super_admin { background: rgba(192, 132, 252, .18);  color: #c084fc; }
+}
+
 .link-error { margin: 0; font-size: .82rem; color: #e57373; }
 
 @keyframes pulse {

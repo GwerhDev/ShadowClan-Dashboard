@@ -114,8 +114,8 @@ async function handleRemoveLeader() {
       <i v-if="clan.status === 'unclaimed'" class="fas fa-unlink"         :title="clan.status"></i>
     </span>
     <span><p>{{ clan.name }}</p></span>
-    <span><p>{{ clan.leader?.name ?? '—' }}</p></span>
-    <span><p>{{ clan.officer?.length ?? 0 }}</p></span>
+    <span><p class="leader-name">{{ clan.leader?.name ?? '—' }}</p></span>
+    <span><p class="officer-count">{{ clan.officer?.length ?? 0 }}</p></span>
     <span><p class="member-count">{{ clan.totalMembers }}/100</p></span>
     <span>
       <div class="buttons-container">

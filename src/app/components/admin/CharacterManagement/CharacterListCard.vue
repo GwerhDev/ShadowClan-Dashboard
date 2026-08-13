@@ -128,7 +128,7 @@ async function removeClan(id: string) {
       <i v-else class="fas fa-unlink" :title="status"></i>
     </span>
     <span><p>{{ character.name }}</p></span>
-    <span><p>{{ displayScore > 0 ? displayScore.toLocaleString('es') : '—' }}</p></span>
+    <span><p class="score-text">{{ displayScore > 0 ? displayScore.toLocaleString('es') : '—' }}</p></span>
     <span>
       <ul class="class-container">
         <img :src="classes.find(cls => cls.value === character.currentClass)?.image" alt="" width="30">
@@ -207,12 +207,17 @@ async function removeClan(id: string) {
 </template>
 
 <style scoped lang="scss">
+.score-text {
+  font-size: .78rem;
+  color: rgba(255, 255, 255, .5);
+}
+
 .score-btn {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, .1);
   border-radius: 5px;
   color: rgba(255, 255, 255, .7);
-  font-size: .82rem;
+  font-size: .78rem;
   padding: .15rem .5rem;
   cursor: pointer;
   transition: border-color .15s, color .15s, background .15s;

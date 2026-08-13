@@ -67,6 +67,14 @@ function handleModalSave(selectedIds: string[]) {
   character.value = selectedIds;
 }
 
+function roleLabel(r: string) {
+  const labels: Record<string, string> = {
+    walker: 'Walker', user: 'Usuario', leader: 'Líder',
+    officer: 'Oficial', admin: 'Admin', super_admin: 'Super Admin',
+  };
+  return labels[r] ?? r;
+}
+
 function styleStatus(status: string) {
   if (status === 'active') {
     return { backgroundColor: '#99d499' };
@@ -105,10 +113,10 @@ function styleStatus(status: string) {
         <option value="admin">admin</option>
         <option value="user">user</option>
       </select>
-      <p v-else>{{ user.role }}</p>
+      <span v-else :class="['role-badge', user.role]">{{ roleLabel(user.role) }}</span>
     </span>
     <span>
-      <p>{{ user.character?.length || 0 }}</p>
+      <p class="char-count">{{ user.character?.length || 0 }}</p>
     </span>
     <span>
       <div class="buttons-container">
@@ -131,10 +139,10 @@ function styleStatus(status: string) {
       <p>{{ user.battletag }}</p>
     </span>
     <span>
-      <p>{{ user.role }}</p>
+      <span :class="['role-badge', user.role]">{{ roleLabel(user.role) }}</span>
     </span>
     <span>
-      <p>{{ user.character?.length || 0 }}</p>
+      <p class="char-count">{{ user.character?.length || 0 }}</p>
     </span>
     <span>
       <div class="buttons-container">
@@ -157,10 +165,10 @@ function styleStatus(status: string) {
       <p>{{ user.battletag }}</p>
     </span>
     <span>
-      <p>{{ user.role }}</p>
+      <span :class="['role-badge', user.role]">{{ roleLabel(user.role) }}</span>
     </span>
     <span>
-      <p>{{ user.character?.length || 0 }}</p>
+      <p class="char-count">{{ user.character?.length || 0 }}</p>
     </span>
     <span>
       <div class="buttons-container">

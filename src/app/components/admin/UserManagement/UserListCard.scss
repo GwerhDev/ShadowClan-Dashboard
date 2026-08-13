@@ -142,6 +142,30 @@ select {
   background: rgba(123, 41, 23, .35);
 }
 
+.char-count {
+  font-size: .78rem;
+  color: rgba(255, 255, 255, .5);
+}
+
+// Rol de plataforma (walker/user/leader/officer/admin/super_admin) — distinto del rol
+// de clan (líder/oficial/miembro), con su propia paleta para no confundir ambos conceptos.
+.role-badge {
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: .15rem .5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+
+  &.walker      { background: rgba(255, 255, 255, .06);  color: rgba(255, 255, 255, .5); }
+  &.user        { background: rgba(147, 197, 253, .15);  color: #93c5fd; }
+  &.leader      { background: rgba(200, 160, 60, .2);    color: #c8a03c; }
+  &.officer     { background: rgba(100, 140, 220, .2);   color: #7aa0e0; }
+  &.admin       { background: rgba(251, 146, 60, .18);   color: #fb923c; }
+  &.super_admin { background: rgba(192, 132, 252, .18);  color: #c084fc; }
+}
+
 .status-image {
   padding: 0;
   position: relative;
