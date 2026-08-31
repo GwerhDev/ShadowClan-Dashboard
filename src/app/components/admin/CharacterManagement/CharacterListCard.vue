@@ -50,9 +50,9 @@ async function handleUpdate(id: string) {
   } else {
     await store.handleUpdateAdminCharacter({
       _id: id,
-      character: name.value,
+      name: name.value,
       resonance: resonance.value,
-      class: currentClass.value,
+      currentClass: currentClass.value,
     });
   }
 

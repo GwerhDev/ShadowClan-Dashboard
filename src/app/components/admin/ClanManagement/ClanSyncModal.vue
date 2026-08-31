@@ -44,7 +44,7 @@ async function handleSync() {
   <CustomModal title="Actualizar clan desde archivo" @close="emit('close')">
     <div class="sync-body">
       <p class="hint">
-        El archivo reemplaza los <strong>miembros</strong> del clan. Los personajes del archivo son creados o actualizados; los que no aparezcan son eliminados del clan.<br />
+        El archivo reemplaza los <strong>miembros</strong> del clan. Los personajes del archivo son creados o actualizados; los que no aparezcan pasan a exmiembros (no se borran, quedan en su historial).<br />
         Columnas requeridas: <strong>Jugador, Resonancia, Armadura, Penetracion, Potencia, Resistencia, Clase, Whatsapp</strong>.
       </p>
       <div class="hint-attendance">
@@ -74,7 +74,7 @@ async function handleSync() {
       <template v-if="done">
         <div class="summary">
           <span>{{ results.length }} procesados</span>
-          <span v-if="removed > 0" class="removed">· {{ removed }} eliminados del clan</span>
+          <span v-if="removed > 0" class="removed">· {{ removed }} pasados a exmiembros</span>
         </div>
         <ul class="result-list">
           <li v-for="r in results" :key="r.name" class="result-row" :class="'row--' + r.status">
