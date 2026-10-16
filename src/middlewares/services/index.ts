@@ -16,7 +16,7 @@ export const getUserData = async (): Promise<AuthResponse> => {
 };
 
 export const logout = async (): Promise<void> => {
-  await axios.get(API_URL + '/logout/', { ...withCredentials, maxRedirects: 0 }).catch(() => {});
+  await axios.get(API_URL + '/auth/logout', { ...withCredentials, maxRedirects: 0 }).catch(() => {});
 };
 
 // ── Usuarios ──────────────────────────────────────────────────────────────────

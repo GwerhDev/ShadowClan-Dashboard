@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { API_URL } from './misc/const';
+import { refreshSession } from './authRefresh';
 
 let _socket: Socket | null = null;
 
@@ -8,6 +9,18 @@ export function connectSocket(): Socket {
   _socket = io(API_URL, {
     withCredentials: true,
     query: { source: 'dashboard' },
+  });
+
+  // Si el handshake falla por token vencido, renovar la sesión y reconectar (una vez por fallo).
+  let retrying = false;
+  _socket.on('connect_error', async (err) => {
+    if (retrying || !/auth|token/i.test(err.message)) return;
+    retrying = true;
+    try {
+      if (await refreshSession()) _socket?.connect();
+    } finally {
+      retrying = false;
+    }
   });
   return _socket;
 }
