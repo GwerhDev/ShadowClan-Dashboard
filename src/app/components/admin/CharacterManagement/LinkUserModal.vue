@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { getUsersPage } from '../../../../middlewares/services';
+import type { User } from '../../../../interfaces';
 import { useStore } from '../../../../middlewares/store';
 import CustomModal from '../../Modals/CustomModal.vue';
 
 const props = defineProps<{ characterId: string; characterName: string }>();
 const emit  = defineEmits<{ close: []; updated: [] }>();
 
-const store: any = useStore();
+const store = useStore();
 
 const query   = ref('');
-const results = ref<any[]>([]);
+const results = ref<User[]>([]);
 const loading = ref(false);
 const saving  = ref(false);
 const error   = ref('');
@@ -33,7 +34,7 @@ async function doSearch() {
   }
 }
 
-async function selectUser(user: any) {
+async function selectUser(user: User) {
   saving.value = true;
   error.value  = '';
   try {

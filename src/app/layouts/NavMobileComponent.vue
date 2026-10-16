@@ -1,5 +1,10 @@
 <style scoped lang="scss" src="./NavMobileComponent.scss" />
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useStore } from '../../middlewares/store';
+
+const store = useStore();
+const isSuperAdmin = computed(() => store.currentUser.userData?.role === 'super_admin');
 </script>
 
 <template>
@@ -12,7 +17,7 @@
           <small>Overview</small>
         </router-link>
 
-        <router-link title="Gestión" to="/management" class="nav-item">
+        <router-link v-if="isSuperAdmin" title="Gestión" to="/management" class="nav-item">
           <span class="icon-wrap">
             <i class="fas fa-shield-halved"></i>
           </span>

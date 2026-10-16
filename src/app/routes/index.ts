@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useStore } from '../../middlewares/store';
 import OverviewPage from '../pages/OverviewPage.vue';
 import OverviewSummary from '../pages/overview/OverviewSummary.vue';
 import OverviewStats from '../pages/overview/OverviewStats.vue';
@@ -10,7 +11,7 @@ import UserManagement from '../components/admin/UserManagement/UserManagement.vu
 import ClanRequestsPage from '../pages/ClanRequestsPage.vue';
 import ClanDetailPage from '../pages/management/ClanDetailPage.vue';
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
@@ -77,3 +78,16 @@ export default createRouter({
     },
   ],
 });
+
+// Las rutas con `requiresSuperAdmin` solo las ve un super_admin; el resto vuelve al overview.
+// (El backend igual valida los permisos; esto es solo UX.)
+router.beforeEach(async (to) => {
+  const store = useStore();
+  await store.ensureUserData();
+  if (store.unauthorized) return true; // App.vue muestra UnauthorizedPage
+  const isSuperAdmin = store.currentUser.userData?.role === 'super_admin';
+  if (to.matched.some(r => r.meta.requiresSuperAdmin) && !isSuperAdmin) return { path: '/overview' };
+  return true;
+});
+
+export default router;

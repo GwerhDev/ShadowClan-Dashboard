@@ -6,7 +6,7 @@ import { Ref, onMounted, ref, computed } from 'vue';
 import CustomModal from '../../Modals/CustomModal.vue';
 import LinkUserModal from './LinkUserModal.vue';
 
-const store: any = useStore();
+const store = useStore();
 const editionActive: Ref<boolean> = ref(false);
 const deleteActive: Ref<boolean>  = ref(false);
 const showStats:    Ref<boolean>  = ref(false);

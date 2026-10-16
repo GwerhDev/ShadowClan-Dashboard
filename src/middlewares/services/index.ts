@@ -1,208 +1,142 @@
 import axios from 'axios';
 import { API_URL } from '../misc/const';
-import { error } from '../misc/errors';
+import type {
+  ActivationAction, AdminNotifications, AuthResponse, Character, CharacterClaim, CharacterCreatePayload,
+  CharacterCreationRequest, CharacterResponse, ClanClaimRequest, ClanCreationRequest, ClanJoinRequest,
+  ChartSeries, GrowthRange, MessageResponse, OverviewStats, PageParams, Paginated, PendingUser,
+  CharacterUpdatePayload, ReviewAction, User, UserUpdatePayload,
+} from '../../interfaces';
 
-export const getUserData: any = async () => {
-  const response: any = await axios.get(API_URL + '/auth', { withCredentials: true })
-    .then(response => response.data);
-  return response;
+const withCredentials = { withCredentials: true };
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+export const getUserData = async (): Promise<AuthResponse> => {
+  return axios.get<AuthResponse>(API_URL + '/auth', withCredentials).then(r => r.data);
 };
 
-export const getUsers: any = async () => {
-  const response: any = await axios.get(API_URL + '/admin/users', { withCredentials: true })
-    .then(response => response.data);
-  return response;
+export const logout = async (): Promise<void> => {
+  await axios.get(API_URL + '/logout/', { ...withCredentials, maxRedirects: 0 }).catch(() => {});
 };
 
-export const getUsersPage: any = async (params: { page: number; limit: number; q?: string }) => {
-  const response: any = await axios.get(API_URL + '/admin/users', { params, withCredentials: true })
-    .then(r => r.data);
-  return response;
+// ── Usuarios ──────────────────────────────────────────────────────────────────
+
+/** Primera página de usuarios (la API siempre pagina, por defecto 20 resultados). */
+export const getUsers = async (): Promise<Paginated<User>> => {
+  return axios.get<Paginated<User>>(API_URL + '/admin/users', withCredentials).then(r => r.data);
 };
 
-export const updateUser: any = async (id: string, formData: any) => {
-  await axios.patch(API_URL + '/admin/users/' + id, formData, { withCredentials: true });
+export const getUsersPage = async (params: PageParams): Promise<Paginated<User>> => {
+  return axios.get<Paginated<User>>(API_URL + '/admin/users', { params, ...withCredentials }).then(r => r.data);
 };
 
-export const deleteUser: any = async (id: string) => {
-  await axios.delete(API_URL + '/admin/users/' + id, { withCredentials: true });
+export const updateUser = async (id: string, formData: UserUpdatePayload): Promise<void> => {
+  await axios.patch(API_URL + '/admin/users/' + id, formData, withCredentials);
 };
 
-export const getAdminCharacters: any = async () => {
-  const response: any = await axios.get(API_URL + '/admin/characters', { withCredentials: true })
-    .then(response => response.data);
-  return response;
+export const deleteUser = async (id: string): Promise<void> => {
+  await axios.delete(API_URL + '/admin/users/' + id, withCredentials);
 };
 
-export const getAdminCharactersPage: any = async (params: { page: number; limit: number; q?: string }) => {
-  const response: any = await axios.get(API_URL + '/admin/characters', { params, withCredentials: true })
-    .then(r => r.data);
-  return response;
+// ── Personajes ────────────────────────────────────────────────────────────────
+
+export const getAdminCharactersPage = async (params: PageParams): Promise<Paginated<Character>> => {
+  return axios.get<Paginated<Character>>(API_URL + '/admin/characters', { params, ...withCredentials }).then(r => r.data);
 };
 
-export const getAdminCharactersByIds: any = async (ids: string[]) => {
+export const getAdminCharactersByIds = async (ids: string[]): Promise<Character[]> => {
   if (!ids.length) return [];
-  const response: any = await axios.get(API_URL + '/admin/characters', { params: { ids: ids.join(',') }, withCredentials: true })
+  const response = await axios.get<Paginated<Character>>(API_URL + '/admin/characters', { params: { ids: ids.join(',') }, ...withCredentials })
     .then(r => r.data);
   return response.data ?? [];
 };
 
-export const createAdminCharacter: any = async (formData: any) => {
-  const response: any = await axios.post(API_URL + '/admin/characters', formData, { withCredentials: true })
-    .then(response => response.data);
-  return response;
+export const createAdminCharacter = async (formData: CharacterCreatePayload): Promise<CharacterResponse> => {
+  return axios.post<CharacterResponse>(API_URL + '/admin/characters', formData, withCredentials).then(r => r.data);
 };
 
-export const updateAdminCharacter: any = async (formData: any) => {
-  const response: any = await axios.patch(API_URL + '/admin/characters', formData, { withCredentials: true });
-  return response.data;
+export const updateAdminCharacter = async (formData: CharacterUpdatePayload): Promise<CharacterResponse> => {
+  return axios.patch<CharacterResponse>(API_URL + '/admin/characters', formData, withCredentials).then(r => r.data);
 };
 
-export const deleteAdminCharacter: any = async (id: string) => {
-  await axios.delete(API_URL + '/admin/characters/' + id, { withCredentials: true });
+export const deleteAdminCharacter = async (id: string): Promise<void> => {
+  await axios.delete(API_URL + '/admin/characters/' + id, withCredentials);
 };
 
-export const unclaimAdminCharacter: any = async (id: string) => {
-  const response: any = await axios.patch(API_URL + '/admin/characters/' + id + '/unclaim', {}, { withCredentials: true })
-    .then(r => r.data);
-  return response;
+export const unclaimAdminCharacter = async (id: string): Promise<CharacterResponse> => {
+  return axios.patch<CharacterResponse>(API_URL + '/admin/characters/' + id + '/unclaim', {}, withCredentials).then(r => r.data);
 };
 
-export const removeCharacterClan: any = async (id: string) => {
-  const response: any = await axios.patch(API_URL + '/admin/characters/' + id + '/remove-clan', {}, { withCredentials: true })
-    .then(r => r.data);
-  return response;
+export const removeCharacterClan = async (id: string): Promise<CharacterResponse> => {
+  return axios.patch<CharacterResponse>(API_URL + '/admin/characters/' + id + '/remove-clan', {}, withCredentials).then(r => r.data);
 };
 
-export const updateUserData: any = async (formData: any, id: any) => {
-  const response: any = await axios.patch(API_URL + '/account/update/' + id, formData, { withCredentials: true })
-    .then(response => response.data)
-    .catch(() => ({ error: error.api.loadItemById }));
-  return response;
+// ── Notificaciones ────────────────────────────────────────────────────────────
+
+export const getAdminNotifications = async (): Promise<AdminNotifications> => {
+  return axios.get<AdminNotifications>(API_URL + '/admin/notifications', withCredentials).then(r => r.data);
 };
 
-export const getAdminNotifications: any = async () => {
-  const response: any = await axios.get(API_URL + '/admin/notifications', { withCredentials: true })
-    .then(response => response.data);
-  return response;
-};
-
-export const getClanRequestsManagement: any = async () => {
-  const response: any = await axios.get(API_URL + '/clan-request/manage', { withCredentials: true })
-    .then(response => response.data);
-  return response;
-};
-
-export const reviewClanRequest: any = async (id: string, action: 'accept' | 'reject') => {
-  const response: any = await axios.patch(API_URL + '/admin/clan-requests/' + id, { action }, { withCredentials: true })
-    .then(response => response.data);
-  return response;
-};
-
-export const getAdminUnclaimedClanRequests: any = async () => {
-  const response: any = await axios.get(API_URL + '/admin/clan-requests?unclaimedOnly=true', { withCredentials: true })
-    .then(r => r.data);
-  return response;
-};
-
-export const removeClanMember: any = async (clanId: string, characterId: string) => {
-  const response: any = await axios.delete(API_URL + '/clan-management/clan/' + clanId + '/members/' + characterId, { withCredentials: true })
-    .then(response => response.data);
-  return response;
-};
-
-export const updateClanMember: any = async (clanId: string, characterId: string, data: any) => {
-  const response: any = await axios.patch(API_URL + '/clan-management/clan/' + clanId + '/members/' + characterId, data, { withCredentials: true })
-    .then(response => response.data);
-  return response;
-};
-
-export const updateMemberRole: any = async (clanId: string, characterId: string, role: 'officer' | 'member') => {
-  const response: any = await axios.patch(API_URL + '/clan-management/clan/' + clanId + '/members/' + characterId + '/role', { role }, { withCredentials: true })
-    .then(response => response.data);
-  return response;
-};
-
-export const cancelClanInvitation: any = async (clanId: string, invitationId: string) => {
-  await axios.delete(API_URL + '/clan-management/clan/' + clanId + '/invitations/' + invitationId, { withCredentials: true });
-};
-
-export const logout: any = async () => {
-  await axios.get(API_URL + '/logout/', { withCredentials: true, maxRedirects: 0 }).catch(() => {});
-};
+// ── Clanes ────────────────────────────────────────────────────────────────────
 
 export { getClans, getClansPage, createClan, updateClan, deleteClan, getClanById, assignClanLeader, removeClanLeader, syncClanFromFile, searchCharacters, getClanDetailMembersPage, updateClanMemberRole } from './clanService';
 
-export const getCharacterClaims: any = async () => {
-  const response: any = await axios.get(API_URL + '/admin/character-claims', { withCredentials: true })
-    .then(response => response.data);
-  return response;
+// ── Solicitudes ───────────────────────────────────────────────────────────────
+
+export const reviewClanRequest = async (id: string, action: ReviewAction): Promise<MessageResponse> => {
+  return axios.patch<MessageResponse>(API_URL + '/admin/clan-requests/' + id, { action }, withCredentials).then(r => r.data);
 };
 
-export const reviewCharacterClaim: any = async (id: string, action: 'accept' | 'reject') => {
-  const response: any = await axios.patch(API_URL + '/admin/character-claims/' + id, { action }, { withCredentials: true })
-    .then(response => response.data);
-  return response;
+export const getAdminUnclaimedClanRequests = async (): Promise<ClanJoinRequest[]> => {
+  return axios.get<ClanJoinRequest[]>(API_URL + '/admin/clan-requests?unclaimedOnly=true', withCredentials).then(r => r.data);
 };
 
-export const getCharacterCreationRequests: any = async () => {
-  const response: any = await axios.get(API_URL + '/admin/character-creation-requests', { withCredentials: true })
-    .then(response => response.data);
-  return response;
+export const getCharacterClaims = async (): Promise<CharacterClaim[]> => {
+  return axios.get<CharacterClaim[]>(API_URL + '/admin/character-claims', withCredentials).then(r => r.data);
 };
 
-export const reviewCharacterCreationRequest: any = async (id: string, action: 'accept' | 'reject') => {
-  const response: any = await axios.patch(API_URL + '/admin/character-creation-requests/' + id, { action }, { withCredentials: true })
-    .then(response => response.data);
-  return response;
+export const reviewCharacterClaim = async (id: string, action: ReviewAction): Promise<MessageResponse> => {
+  return axios.patch<MessageResponse>(API_URL + '/admin/character-claims/' + id, { action }, withCredentials).then(r => r.data);
 };
 
-export const getPendingUserActivations: any = async () => {
-  const response: any = await axios.get(API_URL + '/admin/user-activations', { withCredentials: true })
-    .then(response => response.data);
-  return response;
+export const getCharacterCreationRequests = async (): Promise<CharacterCreationRequest[]> => {
+  return axios.get<CharacterCreationRequest[]>(API_URL + '/admin/character-creation-requests', withCredentials).then(r => r.data);
 };
 
-export const reviewUserActivation: any = async (id: string, action: 'activate' | 'reject') => {
-  const response: any = await axios.patch(API_URL + '/admin/user-activations/' + id, { action }, { withCredentials: true })
-    .then(response => response.data);
-  return response;
+export const reviewCharacterCreationRequest = async (id: string, action: ReviewAction): Promise<MessageResponse> => {
+  return axios.patch<MessageResponse>(API_URL + '/admin/character-creation-requests/' + id, { action }, withCredentials).then(r => r.data);
 };
 
-export { getCharacterByName } from './characterService';
-
-export const getClanClaimRequests: any = async () => {
-  const response: any = await axios.get(API_URL + '/admin/clan-claim-requests', { withCredentials: true })
-    .then(r => r.data);
-  return response;
+export const getPendingUserActivations = async (): Promise<PendingUser[]> => {
+  return axios.get<PendingUser[]>(API_URL + '/admin/user-activations', withCredentials).then(r => r.data);
 };
 
-export const reviewClanClaimRequest: any = async (id: string, action: 'accept' | 'reject') => {
-  const response: any = await axios.patch(API_URL + '/admin/clan-claim-requests/' + id, { action }, { withCredentials: true })
-    .then(r => r.data);
-  return response;
+export const reviewUserActivation = async (id: string, action: ActivationAction): Promise<MessageResponse> => {
+  return axios.patch<MessageResponse>(API_URL + '/admin/user-activations/' + id, { action }, withCredentials).then(r => r.data);
 };
 
-export const getClanCreationRequests: any = async () => {
-  const response: any = await axios.get(API_URL + '/admin/clan-creation-requests', { withCredentials: true })
-    .then(r => r.data);
-  return response;
+export const getClanClaimRequests = async (): Promise<ClanClaimRequest[]> => {
+  return axios.get<ClanClaimRequest[]>(API_URL + '/admin/clan-claim-requests', withCredentials).then(r => r.data);
 };
 
-export const reviewClanCreationRequest: any = async (id: string, action: 'accept' | 'reject') => {
-  const response: any = await axios.patch(API_URL + '/admin/clan-creation-requests/' + id, { action }, { withCredentials: true })
-    .then(r => r.data);
-  return response;
+export const reviewClanClaimRequest = async (id: string, action: ReviewAction): Promise<MessageResponse> => {
+  return axios.patch<MessageResponse>(API_URL + '/admin/clan-claim-requests/' + id, { action }, withCredentials).then(r => r.data);
 };
 
-export const getOverviewStats: any = async () => {
-  const response: any = await axios.get(API_URL + '/admin/overview', { withCredentials: true })
-    .then(r => r.data);
-  return response;
+export const getClanCreationRequests = async (): Promise<ClanCreationRequest[]> => {
+  return axios.get<ClanCreationRequest[]>(API_URL + '/admin/clan-creation-requests', withCredentials).then(r => r.data);
 };
 
-export const getGrowthStats: any = async (range: string = '30') => {
-  const response: any = await axios.get(API_URL + '/admin/overview/growth?range=' + range, { withCredentials: true })
-    .then(r => r.data);
-  return response;
+export const reviewClanCreationRequest = async (id: string, action: ReviewAction): Promise<MessageResponse> => {
+  return axios.patch<MessageResponse>(API_URL + '/admin/clan-creation-requests/' + id, { action }, withCredentials).then(r => r.data);
+};
+
+// ── Overview ──────────────────────────────────────────────────────────────────
+
+export const getOverviewStats = async (): Promise<OverviewStats> => {
+  return axios.get<OverviewStats>(API_URL + '/admin/overview', withCredentials).then(r => r.data);
+};
+
+export const getGrowthStats = async (range: GrowthRange = '30'): Promise<ChartSeries> => {
+  return axios.get<ChartSeries>(API_URL + '/admin/overview/growth?range=' + range, withCredentials).then(r => r.data);
 };

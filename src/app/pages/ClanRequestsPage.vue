@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useStore } from '../../middlewares/store';
-import { reviewClanRequest } from '../../middlewares/services';
 import AppLayout from '../layouts/AppLayout.vue';
 
-const store: any = useStore();
+const store = useStore();
 
 type ViewType = 'users' | 'characters' | 'clans';
 const view = ref<ViewType>('users');
@@ -74,6 +73,7 @@ function backToList() {
   showDetail.value = false;
 }
 
+// Los contadores del badge los ajusta (y resincroniza) el store en cada acción handleReview*.
 async function review(id: string, action: string) {
   processingId.value = id;
   actionError.value = '';
@@ -81,29 +81,23 @@ async function review(id: string, action: string) {
     if (view.value === 'users') {
       await store.handleReviewUserActivation(id, action as 'activate' | 'reject');
       userActivations.value = userActivations.value.filter((u: any) => u._id !== id);
-      if (store.pendingUsersCount > 0) store.pendingUsersCount--;
     } else if (view.value === 'clans') {
       if (selected.value?._clanReqType === 'claim') {
         await store.handleReviewClanClaimRequest(id, action as 'accept' | 'reject');
         clanClaimRequests.value = clanClaimRequests.value.filter((r: any) => r._id !== id);
-        if (store.pendingClanClaimsCount > 0) store.pendingClanClaimsCount--;
       } else if (selected.value?._clanReqType === 'join') {
-        await reviewClanRequest(id, action as 'accept' | 'reject');
+        await store.handleReviewClanRequest(id, action as 'accept' | 'reject');
         clanJoinRequests.value = clanJoinRequests.value.filter((r: any) => r._id !== id);
-        if (store.pendingClanRequestsCount > 0) store.pendingClanRequestsCount--;
       } else {
         await store.handleReviewClanCreationRequest(id, action as 'accept' | 'reject');
         clanCreationRequests.value = clanCreationRequests.value.filter((r: any) => r._id !== id);
-        if (store.pendingClanCreationsCount > 0) store.pendingClanCreationsCount--;
       }
     } else {
       const type = selected.value?._requestType;
       if (type === 'claim') {
         await store.handleReviewCharacterClaim(id, action as 'accept' | 'reject');
-        if (store.pendingClaimsCount > 0) store.pendingClaimsCount--;
       } else {
         await store.handleReviewCharacterCreationRequest(id, action as 'accept' | 'reject');
-        if (store.pendingCreationsCount > 0) store.pendingCreationsCount--;
       }
       characterRequests.value = characterRequests.value.filter((r: any) => r._id !== id);
     }

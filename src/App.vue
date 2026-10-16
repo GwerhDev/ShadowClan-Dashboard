@@ -10,7 +10,7 @@ const authDone = ref(false);
 
 onMounted(async () => {
   try {
-    await store.handleUserData();
+    await store.ensureUserData();
     if (!store.unauthorized) {
       store.initSocket();
       await store.handleFetchPendingCounts();

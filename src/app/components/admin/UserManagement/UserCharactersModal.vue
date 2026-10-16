@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { getAdminCharactersByIds } from '../../../../middlewares/services';
+import type { Character } from '../../../../interfaces';
 import { classes } from '../../../../middlewares/misc/const';
 import CustomModal from '../../Modals/CustomModal.vue';
 
 const props = defineProps<{ characterIds: string[]; userName: string }>();
 const emit  = defineEmits<{ close: [] }>();
 
-const characters = ref<any[]>([]);
+const characters = ref<Character[]>([]);
 const loading = ref(true);
 
 onMounted(async () => {

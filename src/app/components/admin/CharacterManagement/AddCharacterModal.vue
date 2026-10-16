@@ -6,7 +6,7 @@ import CustomModal from '../../Modals/CustomModal.vue';
 import LabeledInput from '../../Inputs/LabeledInput.vue';
 
 const emit = defineEmits(['close']);
-const store: any = useStore();
+const store = useStore();
 const name = ref('');
 const isCharacterEmpty = computed(() => name.value.trim() === '');
 

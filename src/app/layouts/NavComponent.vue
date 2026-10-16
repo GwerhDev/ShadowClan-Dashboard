@@ -11,6 +11,7 @@ const router = useRouter();
 const route = useRoute();
 
 const isRequestsActive = computed(() => route.path === '/requests');
+const isSuperAdmin = computed(() => store.currentUser.userData?.role === 'super_admin');
 
 function goToRequests() {
   router.push('/requests');
@@ -29,7 +30,7 @@ function goToRequests() {
             <i class="fas fa-chart-line"></i>
             <small>Overview</small>
           </router-link>
-          <router-link title="Gestión" to="/management" class="nav-item">
+          <router-link v-if="isSuperAdmin" title="Gestión" to="/management" class="nav-item">
             <div class="nav-icon-wrap">
               <i class="fas fa-shield-halved"></i>
             </div>

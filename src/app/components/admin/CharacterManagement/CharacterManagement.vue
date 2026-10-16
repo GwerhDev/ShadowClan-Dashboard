@@ -5,9 +5,10 @@ import TableComponent from '../../Tables/TableComponent.vue';
 import CharacterListCard from './CharacterListCard.vue';
 import AddCharacterModal from './AddCharacterModal.vue';
 import { getAdminCharactersPage } from '../../../../middlewares/services';
+import type { Character } from '../../../../interfaces';
 
 const showModal   = ref(false);
-const characters  = ref<any[]>([]);
+const characters  = ref<Character[]>([]);
 const loading     = ref(false);
 const page        = ref(1);
 const hasMore     = ref(false);

@@ -1,80 +1,69 @@
 import axios from "axios"
 import { API_URL } from "../misc/const"
+import type {
+  Character, Clan, ClanCreatePayload, ClanMembersPage, ClanRole, ClanSyncResult,
+  ClanUpdatePayload, PageParams, Paginated,
+} from "../../interfaces"
 
-export const getClans: any = async () => {
-  const response: any = await axios.get(API_URL + "/admin/clans", { withCredentials: true })
-                                   .then(response => response.data)
-  return response;
+const withCredentials = { withCredentials: true };
+
+// Nota: los endpoints de escritura de /admin/clans devuelven la primera página de clanes ordenados.
+
+export const getClans = async (): Promise<Paginated<Clan>> => {
+  return axios.get<Paginated<Clan>>(API_URL + "/admin/clans", withCredentials).then(r => r.data);
 };
 
-export const getClansPage: any = async (params: { page: number; limit: number; q?: string }) => {
-  const response: any = await axios.get(API_URL + "/admin/clans", { params, withCredentials: true })
-                                   .then(r => r.data)
-  return response;
+export const getClansPage = async (params: PageParams): Promise<Paginated<Clan>> => {
+  return axios.get<Paginated<Clan>>(API_URL + "/admin/clans", { params, ...withCredentials }).then(r => r.data);
 };
 
-export const createClan: any = async (formData: any) => {
-  const response: any = await axios.post(API_URL + "/admin/clans", formData, { withCredentials: true })
-                                   .then(response => response.data)
-  return response;
+export const createClan = async (formData: ClanCreatePayload): Promise<Clan[]> => {
+  return axios.post<Clan[]>(API_URL + "/admin/clans", formData, withCredentials).then(r => r.data);
 };
 
-export const updateClan: any = async (formData: any) => {
-  const response: any = await axios.patch(API_URL + "/admin/clans", formData, { withCredentials: true })
-                                   .then(response => response.data)
-  return response;
+export const updateClan = async (formData: ClanUpdatePayload): Promise<Clan[]> => {
+  return axios.patch<Clan[]>(API_URL + "/admin/clans", formData, withCredentials).then(r => r.data);
 };
 
-export const deleteClan: any = async (id: any) => {
-  const response: any = await axios.delete(API_URL + "/admin/clans/" + id, { withCredentials: true })
-                                   .then(response => response.data)
-  return response;
+export const deleteClan = async (id: string): Promise<Clan[]> => {
+  return axios.delete<Clan[]>(API_URL + "/admin/clans/" + id, withCredentials).then(r => r.data);
 };
 
-export const getClanById: any = async (id: string) => {
-  const response: any = await axios.get(API_URL + "/admin/clans/" + id, { withCredentials: true })
-                                   .then(response => response.data)
-  return response;
+export const getClanById = async (id: string): Promise<Clan> => {
+  return axios.get<Clan>(API_URL + "/admin/clans/" + id, withCredentials).then(r => r.data);
 };
 
-export const getClanDetailMembersPage: any = async (clanId: string, params: { page: number; limit: number; q?: string }) => {
-  const response: any = await axios.get(API_URL + "/admin/clans/" + clanId + "/members", {
-    params,
-    withCredentials: true,
-  }).then(r => r.data);
-  return response;
+export const getClanDetailMembersPage = async (clanId: string, params: PageParams): Promise<ClanMembersPage> => {
+  return axios.get<ClanMembersPage>(API_URL + "/admin/clans/" + clanId + "/members", { params, ...withCredentials })
+    .then(r => r.data);
 };
 
-export const removeClanLeader: any = async (clanId: string) => {
-  const response: any = await axios.delete(API_URL + "/admin/clans/" + clanId + "/leader", { withCredentials: true })
-                                   .then(response => response.data)
-  return response;
+export const removeClanLeader = async (clanId: string): Promise<Clan[]> => {
+  return axios.delete<Clan[]>(API_URL + "/admin/clans/" + clanId + "/leader", withCredentials).then(r => r.data);
 };
 
-export const assignClanLeader: any = async (clanId: string, leaderId: string) => {
-  const response: any = await axios.patch(API_URL + "/admin/clans/" + clanId + "/leader", { leaderId }, { withCredentials: true })
-                                   .then(response => response.data)
-  return response;
+export const assignClanLeader = async (clanId: string, leaderId: string): Promise<Clan[]> => {
+  return axios.patch<Clan[]>(API_URL + "/admin/clans/" + clanId + "/leader", { leaderId }, withCredentials)
+    .then(r => r.data);
 };
 
-export const syncClanFromFile: any = async (clanId: string, file: File) => {
+export const syncClanFromFile = async (clanId: string, file: File): Promise<ClanSyncResult> => {
   const formData = new FormData();
   formData.append('file', file);
-  const response: any = await axios.post(API_URL + "/admin/clans/" + clanId + "/sync", formData, {
-    withCredentials: true,
+  return axios.post<ClanSyncResult>(API_URL + "/admin/clans/" + clanId + "/sync", formData, {
+    ...withCredentials,
     headers: { 'Content-Type': 'multipart/form-data' },
   }).then(r => r.data);
-  return response;
 };
 
-export const searchCharacters: any = async (q: string) => {
-  const response: any = await axios.get(API_URL + "/admin/characters?q=" + encodeURIComponent(q) + "&limit=10", { withCredentials: true })
-                                   .then(response => response.data)
+export const searchCharacters = async (q: string): Promise<Character[]> => {
+  const response = await axios.get<Paginated<Character>>(
+    API_URL + "/admin/characters?q=" + encodeURIComponent(q) + "&limit=10", withCredentials,
+  ).then(r => r.data);
   return response.data ?? [];
 };
 
-export const updateClanMemberRole: any = async (clanId: string, memberId: string, role: 'leader' | 'officer' | 'member') => {
-  const response: any = await axios.patch(API_URL + "/admin/clans/" + clanId + "/members/" + memberId + "/role", { role }, { withCredentials: true })
-                                   .then(r => r.data);
-  return response;
+export const updateClanMemberRole = async (clanId: string, memberId: string, role: ClanRole): Promise<{ ok: boolean }> => {
+  return axios.patch<{ ok: boolean }>(API_URL + "/admin/clans/" + clanId + "/members/" + memberId + "/role", { role }, withCredentials)
+    .then(r => r.data);
 };

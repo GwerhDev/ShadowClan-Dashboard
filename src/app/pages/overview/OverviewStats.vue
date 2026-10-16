@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { getOverviewStats } from '../../../middlewares/services';
+import type { OverviewStats } from '../../../interfaces';
 import { Bar, Doughnut } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -11,7 +12,7 @@ import {
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement);
 
 const loading = ref(true);
-const data    = ref<any>(null);
+const data    = ref<OverviewStats | null>(null);
 
 onMounted(async () => {
   try {
@@ -54,10 +55,10 @@ const requestsData = computed(() => ({
 const charsByClassData = computed(() => {
   const items = data.value?.charactersByClass ?? [];
   return {
-    labels: items.map((c: any) => c.label),
+    labels: items.map(c => c.label),
     datasets: [{
       label: 'Personajes',
-      data:  items.map((c: any) => c.count),
+      data:  items.map(c => c.count),
       backgroundColor: 'rgba(227,210,168,.5)',
       borderColor:     'rgba(227,210,168,.9)',
       borderWidth: 1,
@@ -72,7 +73,7 @@ const hasRequestsData = computed(() => {
   return r && (r.pending + r.accepted + r.rejected) > 0;
 });
 const hasClassData    = computed(() =>
-  (data.value?.charactersByClass ?? []).some((c: any) => c.count > 0)
+  (data.value?.charactersByClass ?? []).some(c => c.count > 0)
 );
 
 const base = {

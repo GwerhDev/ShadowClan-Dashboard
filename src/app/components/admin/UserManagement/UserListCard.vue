@@ -5,7 +5,7 @@ import { Ref, ref } from 'vue';
 import LinkCharacterModal from './LinkCharacterModal.vue';
 import UserCharactersModal from './UserCharactersModal.vue';
 
-const store: any = useStore();
+const store = useStore();
 const props = defineProps<{ user: any }>();
 const emit  = defineEmits(['refresh']);
 

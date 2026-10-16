@@ -1,6 +1,21 @@
-export const API_URL: string    = import.meta.env.VITE_API_URL;
-export const WEB_URL: string    = import.meta.env.VITE_WEB_URL;
-export const CLIENT_URL: string = import.meta.env.VITE_CLIENT_URL;
+// URL de la API por defecto (puerto de desarrollo) si VITE_API_URL no está definida.
+const FALLBACK_API_URL = 'http://localhost:8080';
+
+function resolveApiUrl(): string {
+  const value = import.meta.env.VITE_API_URL;
+  if (!value) {
+    console.error(
+      `[config] VITE_API_URL no está definida; se usará ${FALLBACK_API_URL}. ` +
+      'Revise el archivo .env o las variables de entorno del despliegue.',
+    );
+    return FALLBACK_API_URL;
+  }
+  return value;
+}
+
+export const API_URL: string    = resolveApiUrl();
+export const WEB_URL: string    = import.meta.env.VITE_WEB_URL ?? '';
+export const CLIENT_URL: string = import.meta.env.VITE_CLIENT_URL ?? '';
 
 export const classes = [
   { name: "Druida", value: "druid", image: "https://blz-contentstack-images.akamaized.net/v3/assets/blt77f4425de611b362/blt75eca7075dbe5195/6851ec39300f1cc6e7953c4b/druid_svg_1.svg" },

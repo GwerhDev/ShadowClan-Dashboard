@@ -10,7 +10,7 @@ const props = defineProps<{
   userId: string;
 }>();
 
-const store: any = useStore();
+const store = useStore();
 const emits = defineEmits<{ close: []; save: [selectedIds: string[]] }>();
 
 const selectedMemberIds = ref<string[]>([...props.initialSelectedIds]);

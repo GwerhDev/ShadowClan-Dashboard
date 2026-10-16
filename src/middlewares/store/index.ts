@@ -1,34 +1,71 @@
 import { defineStore } from 'pinia';
 import {
-  getUserData, getUsers, updateUser, deleteUser,
-  getAdminCharacters, createAdminCharacter, updateAdminCharacter, deleteAdminCharacter, unclaimAdminCharacter, removeCharacterClan,
+  getUserData, updateUser, deleteUser,
+  createAdminCharacter, updateAdminCharacter, deleteAdminCharacter, unclaimAdminCharacter, removeCharacterClan,
   getClans, createClan, updateClan, deleteClan,
   getCharacterClaims, reviewCharacterClaim,
   getCharacterCreationRequests, reviewCharacterCreationRequest,
   getPendingUserActivations, reviewUserActivation,
   getClanCreationRequests, reviewClanCreationRequest,
   getClanClaimRequests, reviewClanClaimRequest,
-  getAdminUnclaimedClanRequests,
+  getAdminUnclaimedClanRequests, reviewClanRequest,
   getAdminNotifications,
-  getClanRequestsManagement, reviewClanRequest,
 } from '../services';
 import { claimCharacterAsAdmin, unclaimCharacterAsAdmin } from '../services/admin/characters';
 import { connectSocket } from '../socket';
 import { WEB_URL } from '../misc/const';
 import { logout } from '../services';
+import type {
+  ActivationAction, AdminNotifications, AdminRequestPayload, AuthUserData, CharacterCreatePayload,
+  CharacterLinkPayload, CharacterUpdatePayload, Clan, ClanCreatePayload, ClanUpdatePayload,
+  IncomingRequestSignal, Paginated, ReviewAction, UserUpdatePayload,
+} from '../../interfaces';
+
+/** Contadores de solicitudes pendientes que suma el badge de la navegación. */
+type PendingCountKey =
+  | 'pendingClaimsCount'
+  | 'pendingCreationsCount'
+  | 'pendingUsersCount'
+  | 'pendingClanRequestsCount'
+  | 'pendingClanCreationsCount'
+  | 'pendingClanClaimsCount';
+
+interface StoreState {
+  currentUser: {
+    logged: boolean;
+    userData: AuthUserData | null;
+  };
+  unauthorized: boolean;
+  admin: {
+    clans: Paginated<Clan> | Clan[] | null;
+    notifications: AdminNotifications | null;
+  };
+  pendingClaimsCount: number;
+  pendingCreationsCount: number;
+  pendingUsersCount: number;
+  pendingClanRequestsCount: number;
+  pendingClanCreationsCount: number;
+  pendingClanClaimsCount: number;
+  lastIncomingRequest: IncomingRequestSignal | null;
+}
+
+// Promesa compartida de la carga inicial de /auth (la usan el guard del router y App.vue).
+let userDataPromise: Promise<void> | null = null;
+
+// Retardo para agrupar varias resincronizaciones de contadores en una sola ronda de peticiones.
+const PENDING_COUNTS_RESYNC_MS = 400;
+let pendingCountsTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const useStore = defineStore('store', {
-  state: () => ({
+  state: (): StoreState => ({
     currentUser: {
       logged: false,
-      userData: null as any,
+      userData: null,
     },
     unauthorized: false,
     admin: {
-      users:        null as any,
-      characters:   null as any,
-      clans:        null as any,
-      notifications: null as any,
+      clans:         null,
+      notifications: null,
     },
     pendingClaimsCount: 0,
     pendingCreationsCount: 0,
@@ -36,16 +73,21 @@ export const useStore = defineStore('store', {
     pendingClanRequestsCount: 0,
     pendingClanCreationsCount: 0,
     pendingClanClaimsCount: 0,
-    lastIncomingRequest: null as any,
+    lastIncomingRequest: null,
   }),
 
   getters: {
-    pendingRequestsTotal(state) {
+    pendingRequestsTotal(state): number {
       return state.pendingClaimsCount + state.pendingCreationsCount + state.pendingUsersCount + state.pendingClanCreationsCount + state.pendingClanClaimsCount + state.pendingClanRequestsCount;
     },
   },
 
   actions: {
+    ensureUserData(): Promise<void> {
+      if (!userDataPromise) userDataPromise = this.handleUserData();
+      return userDataPromise;
+    },
+
     async handleUserData() {
       try {
         const data = await getUserData();
@@ -55,8 +97,9 @@ export const useStore = defineStore('store', {
         if (!isAdmin) {
           this.unauthorized = true;
         }
-      } catch (error: any) {
-        if (error?.response?.status === 401 || !error?.response) {
+      } catch (error: unknown) {
+        const response = (error as { response?: { status?: number } } | null)?.response;
+        if (response?.status === 401 || !response) {
           window.location.href = WEB_URL + '/login';
         } else {
           this.unauthorized = true;
@@ -71,7 +114,7 @@ export const useStore = defineStore('store', {
 
     initSocket() {
       const socket = connectSocket();
-      socket.on('admin:request:new', (payload: any) => {
+      socket.on('admin:request:new', (payload: AdminRequestPayload) => {
         if      (payload.type === 'character-claim')    this.pendingClaimsCount++;
         else if (payload.type === 'character-creation') this.pendingCreationsCount++;
         else if (payload.type === 'user-activation')    this.pendingUsersCount++;
@@ -83,26 +126,24 @@ export const useStore = defineStore('store', {
       socket.on('clan-request:new-dashboard', () => {
         this.pendingClanRequestsCount++;
       });
-      socket.on('clan-request:cancelled', (payload: any) => {
+      socket.on('clan-request:cancelled', (payload: { id: string }) => {
         if (this.pendingClanRequestsCount > 0) this.pendingClanRequestsCount--;
-        // Signal the requests page to remove the item
+        // Avisa a la página de solicitudes para que quite el elemento
         this.lastIncomingRequest = { ...payload, type: 'clan-request-cancelled', _ts: Date.now() };
+        this.schedulePendingCountsResync();
       });
-      socket.on('admin:user:registered', () => {
-        if (this.admin.users !== null) this.handleGetUsers();
-      });
-      socket.on('admin:user:deleted', (payload: any) => {
-        if (this.admin.users !== null) {
-          this.admin.users = (this.admin.users as any[]).filter((u: any) => String(u._id) !== String(payload.id));
+      // Cualquier otro evento admin:request:* (p. ej. una revisión hecha por otro admin)
+      // invalida los contadores locales: se resincronizan con la API.
+      socket.onAny((event: string) => {
+        if (event.startsWith('admin:request:') && event !== 'admin:request:new') {
+          this.schedulePendingCountsResync();
         }
       });
+      // Tras una reconexión pudieron perderse eventos: se vuelven a pedir los contadores.
+      socket.io.on('reconnect', () => this.schedulePendingCountsResync());
     },
 
-    async handleGetUsers() {
-      this.admin.users = await getUsers();
-    },
-
-    async handleUpdateUser(formData: any, id: string) {
+    async handleUpdateUser(formData: UserUpdatePayload, id: string) {
       await updateUser(id, formData);
     },
 
@@ -110,17 +151,12 @@ export const useStore = defineStore('store', {
       await deleteUser(id);
     },
 
-    async handleGetAdminCharacters() {
-      this.admin.characters = await getAdminCharacters();
-    },
-
-    async handleCreateAdminCharacter(formData: any) {
+    async handleCreateAdminCharacter(formData: CharacterCreatePayload) {
       return await createAdminCharacter(formData);
     },
 
-    async handleUpdateAdminCharacter(formData: any) {
-      const response = await updateAdminCharacter(formData);
-      this.admin.characters = response.characters;
+    async handleUpdateAdminCharacter(formData: CharacterUpdatePayload) {
+      return await updateAdminCharacter(formData);
     },
 
     async handleDeleteMember(id: string) {
@@ -129,37 +165,31 @@ export const useStore = defineStore('store', {
 
     async handleUnclaimCharacter(id: string) {
       await unclaimAdminCharacter(id);
-      this.admin.characters = await getAdminCharacters();
     },
 
     async handleRemoveCharacterClan(id: string) {
       await removeCharacterClan(id);
-      this.admin.characters = await getAdminCharacters();
     },
 
-    async handleClaimCharacterAsAdmin(formData: any) {
-      const response = await claimCharacterAsAdmin(formData);
-      this.admin.users = response.users;
-      this.admin.characters = response.characters;
+    async handleClaimCharacterAsAdmin(formData: CharacterLinkPayload) {
+      return await claimCharacterAsAdmin(formData);
     },
 
-    async handleUnclaimCharacterAsAdmin(formData: any) {
-      const response = await unclaimCharacterAsAdmin(formData);
-      this.admin.users = response.users;
-      this.admin.characters = response.characters;
+    async handleUnclaimCharacterAsAdmin(formData: CharacterLinkPayload) {
+      return await unclaimCharacterAsAdmin(formData);
     },
 
     async handleGetClans() {
       this.admin.clans = await getClans();
     },
 
-    async handleCreateClan(formData: any) {
+    async handleCreateClan(formData: ClanCreatePayload) {
       const response = await createClan(formData);
       this.admin.clans = response;
       return response;
     },
 
-    async handleUpdateClan(formData: any) {
+    async handleUpdateClan(formData: ClanUpdatePayload) {
       const response = await updateClan(formData);
       this.admin.clans = response;
     },
@@ -175,8 +205,10 @@ export const useStore = defineStore('store', {
       return await getCharacterClaims();
     },
 
-    async handleReviewCharacterClaim(id: string, action: 'accept' | 'reject') {
-      return await reviewCharacterClaim(id, action);
+    async handleReviewCharacterClaim(id: string, action: ReviewAction) {
+      const res = await reviewCharacterClaim(id, action);
+      this.markRequestReviewed('pendingClaimsCount');
+      return res;
     },
 
     // --- Character creation requests ---
@@ -184,8 +216,10 @@ export const useStore = defineStore('store', {
       return await getCharacterCreationRequests();
     },
 
-    async handleReviewCharacterCreationRequest(id: string, action: 'accept' | 'reject') {
-      return await reviewCharacterCreationRequest(id, action);
+    async handleReviewCharacterCreationRequest(id: string, action: ReviewAction) {
+      const res = await reviewCharacterCreationRequest(id, action);
+      this.markRequestReviewed('pendingCreationsCount');
+      return res;
     },
 
     // --- Unclaimed clan join requests ---
@@ -193,12 +227,21 @@ export const useStore = defineStore('store', {
       return await getAdminUnclaimedClanRequests();
     },
 
+    async handleReviewClanRequest(id: string, action: ReviewAction) {
+      const res = await reviewClanRequest(id, action);
+      this.markRequestReviewed('pendingClanRequestsCount');
+      return res;
+    },
+
     // --- Clan claim requests ---
     async handleGetClanClaimRequests() {
       return await getClanClaimRequests();
     },
-    async handleReviewClanClaimRequest(id: string, action: 'accept' | 'reject') {
-      return await reviewClanClaimRequest(id, action);
+
+    async handleReviewClanClaimRequest(id: string, action: ReviewAction) {
+      const res = await reviewClanClaimRequest(id, action);
+      this.markRequestReviewed('pendingClanClaimsCount');
+      return res;
     },
 
     // --- Clan creation requests ---
@@ -206,8 +249,10 @@ export const useStore = defineStore('store', {
       return await getClanCreationRequests();
     },
 
-    async handleReviewClanCreationRequest(id: string, action: 'accept' | 'reject') {
-      return await reviewClanCreationRequest(id, action);
+    async handleReviewClanCreationRequest(id: string, action: ReviewAction) {
+      const res = await reviewClanCreationRequest(id, action);
+      this.markRequestReviewed('pendingClanCreationsCount');
+      return res;
     },
 
     // --- User activations ---
@@ -215,39 +260,51 @@ export const useStore = defineStore('store', {
       return await getPendingUserActivations();
     },
 
-    async handleReviewUserActivation(id: string, action: 'activate' | 'reject') {
-      return await reviewUserActivation(id, action);
+    async handleReviewUserActivation(id: string, action: ActivationAction) {
+      const res = await reviewUserActivation(id, action);
+      this.markRequestReviewed('pendingUsersCount');
+      return res;
     },
 
     async handleGetAdminNotifications() {
       this.admin.notifications = await getAdminNotifications();
     },
 
-    async handleGetClanRequestsManagement() {
-      return await getClanRequestsManagement();
+    // --- Contadores de solicitudes pendientes ---
+
+    /** Descuenta una solicitud revisada (feedback inmediato) y resincroniza con la API. */
+    markRequestReviewed(key: PendingCountKey) {
+      if (this[key] > 0) this[key]--;
+      this.schedulePendingCountsResync();
     },
 
-    async handleReviewClanRequest(id: string, action: 'accept' | 'reject') {
-      return await reviewClanRequest(id, action);
+    /** Agrupa resincronizaciones cercanas en una sola llamada a handleFetchPendingCounts. */
+    schedulePendingCountsResync() {
+      if (pendingCountsTimer) clearTimeout(pendingCountsTimer);
+      pendingCountsTimer = setTimeout(() => {
+        pendingCountsTimer = null;
+        this.handleFetchPendingCounts();
+      }, PENDING_COUNTS_RESYNC_MS);
     },
 
     async handleFetchPendingCounts() {
       try {
-        const [claims, creations, users] = await Promise.all([
+        // Todas las colas en paralelo. Los endpoints admin devuelven solo pendientes,
+        // salvo character-claims que trae el historial completo → se filtra.
+        const [claims, creations, users, unclaimedJoins, clanCreations, clanClaims] = await Promise.all([
           getCharacterClaims().catch(() => []),
           getCharacterCreationRequests().catch(() => []),
           getPendingUserActivations().catch(() => []),
+          getAdminUnclaimedClanRequests().catch(() => []),
+          getClanCreationRequests().catch(() => []),
+          getClanClaimRequests().catch(() => []),
         ]);
-        this.pendingClaimsCount = (claims as any[]).filter((r: any) => r.status === 'pending').length;
-        this.pendingCreationsCount = (creations as any[]).length;
-        this.pendingUsersCount = (users as any[]).length;
-        // clanReqs from /clan-request/manage requires characterId — use admin endpoint instead
-        const unclaimedJoins = await getAdminUnclaimedClanRequests().catch(() => []);
-        this.pendingClanRequestsCount = (unclaimedJoins as any[]).length;
-        const clanCreations = await getClanCreationRequests().catch(() => []);
-        this.pendingClanCreationsCount = (clanCreations as any[]).length;
-        const clanClaims = await getClanClaimRequests().catch(() => []);
-        this.pendingClanClaimsCount = (clanClaims as any[]).length;
+        this.pendingClaimsCount        = claims.filter(r => r.status === 'pending').length;
+        this.pendingCreationsCount     = creations.length;
+        this.pendingUsersCount         = users.length;
+        this.pendingClanRequestsCount  = unclaimedJoins.length;
+        this.pendingClanCreationsCount = clanCreations.length;
+        this.pendingClanClaimsCount    = clanClaims.length;
       } catch {
         // silently ignore
       }

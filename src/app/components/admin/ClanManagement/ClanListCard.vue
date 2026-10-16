@@ -8,7 +8,7 @@ import OfficersModal from './OfficersModal.vue';
 import ClanSyncModal from './ClanSyncModal.vue';
 import { removeClanLeader } from '../../../../middlewares/services';
 
-const store: any = useStore();
+const store = useStore();
 const router = useRouter();
 const editionActive: Ref<boolean>  = ref(false);
 const deleteActive: Ref<boolean>   = ref(false);

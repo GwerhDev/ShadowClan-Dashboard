@@ -7,7 +7,7 @@ import LabeledInput from '../../Inputs/LabeledInput.vue';
 
 const emit = defineEmits(['close', 'clanCreated']);
 
-const store: any = useStore();
+const store = useStore();
 const clanName = ref('');
 const isClanNameEmpty = computed(() => clanName.value.trim() === '');
 

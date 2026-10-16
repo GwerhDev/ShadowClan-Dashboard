@@ -5,9 +5,10 @@ import TableComponent from '../../Tables/TableComponent.vue';
 import ClanListCard from './ClanListCard.vue';
 import AddClanModal from './AddClanModal.vue';
 import { getClansPage } from '../../../../middlewares/services';
+import type { Clan } from '../../../../interfaces';
 
 const showModal   = ref(false);
-const clans       = ref<any[]>([]);
+const clans       = ref<Clan[]>([]);
 const loading     = ref(false);
 const page        = ref(1);
 const hasMore     = ref(false);

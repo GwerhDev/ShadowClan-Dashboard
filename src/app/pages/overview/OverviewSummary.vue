@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { getOverviewStats, getGrowthStats } from '../../../middlewares/services';
+import type { GrowthRange, OverviewStats } from '../../../interfaces';
 import { Doughnut, Line } from 'vue-chartjs';
 import {
   Chart as ChartJS, ArcElement, Tooltip, Legend,
@@ -12,8 +13,8 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointE
 
 const router       = useRouter();
 const loading      = ref(true);
-const data         = ref<any>(null);
-const growthRange  = ref<'30' | '60' | '90' | 'all'>('30');
+const data         = ref<OverviewStats | null>(null);
+const growthRange  = ref<GrowthRange>('30');
 const growthRaw    = ref<{ labels: string[]; counts: number[] }>({ labels: [], counts: [] });
 const growthLoading = ref(false);
 
@@ -46,7 +47,7 @@ function navigate(to: string) {
 }
 
 const rolesData = computed(() => {
-  const r = data.value?.roleDistribution ?? {};
+  const r: Partial<OverviewStats['roleDistribution']> = data.value?.roleDistribution ?? {};
   return {
     labels: ['Walker', 'Usuario', 'Admin', 'Super Admin'],
     datasets: [{

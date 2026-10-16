@@ -130,7 +130,7 @@ async function openLink(row: any) {
   linkTarget.value = row;
   userSearch.value = '';
   linkError.value  = '';
-  if (!allUsers.value.length) allUsers.value = await getUsers();
+  if (!allUsers.value.length) allUsers.value = (await getUsers()).data;
 }
 
 const filteredUsers = () => {

@@ -4,8 +4,9 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import TableComponent from '../../Tables/TableComponent.vue';
 import UserListCard from './UserListCard.vue';
 import { getUsersPage } from '../../../../middlewares/services';
+import type { User } from '../../../../interfaces';
 
-const users       = ref<any[]>([]);
+const users       = ref<User[]>([]);
 const loading     = ref(false);
 const page        = ref(1);
 const hasMore     = ref(false);
