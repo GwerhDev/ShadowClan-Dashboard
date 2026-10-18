@@ -97,6 +97,7 @@
         height: 100%;
         display: flex;
         flex-direction: column;
+        padding-block: 1rem;
 
         .scrollable-content {
           flex-grow: 1;

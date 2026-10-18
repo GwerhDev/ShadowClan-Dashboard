@@ -19,11 +19,13 @@ function syncHead(e: Event) {
 
 <template>
   <div class="table-component">
-    <div ref="headRef" v-stuck class="table-head-scroll">
-      <div class="table-container">
-        <nav :style="gridColumns">
-          <li v-for="(item, index) in navItems" :key="index">{{ item }}</li>
-        </nav>
+    <div v-stuck class="table-head-scroll">
+      <div ref="headRef" class="table-head-inner">
+        <div class="table-container">
+          <nav :style="gridColumns">
+            <li v-for="(item, index) in navItems" :key="index">{{ item }}</li>
+          </nav>
+        </div>
       </div>
     </div>
     <div class="table-scroll-wrapper" @scroll="syncHead">
