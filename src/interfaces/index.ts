@@ -265,3 +265,17 @@ export interface AdminRequestPayload {
 export type IncomingRequestSignal =
   | (AdminRequestPayload & { _ts: number })
   | { type: 'clan-request-cancelled'; id: string; _ts: number };
+
+// ── Sorteos ───────────────────────────────────────────────────────────────────
+
+export interface Prize {
+  _id: string;
+  name: string;
+  description?: string;
+  /** Inactivo: oculto para los clanes (los sorteos pasados lo conservan). */
+  active: boolean;
+  /** Sorteos en los que se usó (si > 0 no se puede eliminar, solo desactivar). */
+  rafflesCount?: number;
+}
+
+export type PrizeInput = Partial<Pick<Prize, 'name' | 'description' | 'active'>>;

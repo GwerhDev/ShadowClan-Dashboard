@@ -10,6 +10,7 @@ import CharacterManagement from '../components/admin/CharacterManagement/Charact
 import UserManagement from '../components/admin/UserManagement/UserManagement.vue';
 import ClanRequestsPage from '../pages/ClanRequestsPage.vue';
 import ClanDetailPage from '../pages/management/ClanDetailPage.vue';
+import PrizeManagement from '../components/admin/PrizeManagement/PrizeManagement.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -67,6 +68,12 @@ const router = createRouter({
           name: 'Users',
           component: UserManagement,
           meta: { title: 'Usuarios', requiresSuperAdmin: true },
+        },
+        {
+          path: 'prizes',
+          name: 'Prizes',
+          component: PrizeManagement,
+          meta: { title: 'Premios', requiresSuperAdmin: true },
         },
       ],
     },

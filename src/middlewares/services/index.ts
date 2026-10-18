@@ -4,7 +4,7 @@ import type {
   ActivationAction, AdminNotifications, AuthResponse, Character, CharacterClaim, CharacterCreatePayload,
   CharacterCreationRequest, CharacterResponse, ClanClaimRequest, ClanCreationRequest, ClanJoinRequest,
   ChartSeries, GrowthRange, MessageResponse, OverviewStats, PageParams, Paginated, PendingUser,
-  CharacterUpdatePayload, ReviewAction, User, UserUpdatePayload,
+  CharacterUpdatePayload, ReviewAction, User, UserUpdatePayload, Prize, PrizeInput,
 } from '../../interfaces';
 
 const withCredentials = { withCredentials: true };
@@ -139,4 +139,22 @@ export const getOverviewStats = async (): Promise<OverviewStats> => {
 
 export const getGrowthStats = async (range: GrowthRange = '30'): Promise<ChartSeries> => {
   return axios.get<ChartSeries>(API_URL + '/admin/overview/growth?range=' + range, withCredentials).then(r => r.data);
+};
+
+// ── Premios (sorteos) ─────────────────────────────────────────────────────────
+
+export const getPrizes = async (): Promise<Prize[]> => {
+  return axios.get<Prize[]>(API_URL + '/admin/prizes', withCredentials).then(r => r.data);
+};
+
+export const createPrize = async (data: PrizeInput): Promise<Prize> => {
+  return axios.post<Prize>(API_URL + '/admin/prizes', data, withCredentials).then(r => r.data);
+};
+
+export const updatePrize = async (id: string, data: PrizeInput): Promise<Prize> => {
+  return axios.patch<Prize>(API_URL + '/admin/prizes/' + id, data, withCredentials).then(r => r.data);
+};
+
+export const deletePrize = async (id: string): Promise<MessageResponse> => {
+  return axios.delete<MessageResponse>(API_URL + '/admin/prizes/' + id, withCredentials).then(r => r.data);
 };
