@@ -3,6 +3,7 @@
   padding: 0;
   width: 100%;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   justify-content: center;
 
@@ -24,7 +25,6 @@
 
     .section-container {
       margin: 0;
-      padding-top: 1rem;
       display: flex;
       height: 100%;
       overflow: hidden;
@@ -32,7 +32,7 @@
       .menu-section {
         margin: 0;
         border-right: solid 1px rgba(255, 255, 255, .07);
-        margin-bottom: 1rem;
+        margin-block: 1rem;
       }
 
       >.menu-section {
@@ -112,7 +112,7 @@
   .container-lo-page {
     .lo-container {
       margin-top: 0;
-      height: 100vh;
+      height: 100%;
 
       .section-container {
         width: 100%;

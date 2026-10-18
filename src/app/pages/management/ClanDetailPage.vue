@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { vStickyBar } from '../../directives/stickyBar';
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
@@ -185,7 +186,7 @@ const navItems = ['estado', 'nombre', 'rol', 'clase', 'resonancia', 'acciones'];
     </div>
 
     <!-- Search bar -->
-    <div class="search-bar">
+    <div class="search-bar" v-sticky-bar>
       <div class="search-wrap">
         <i class="fas fa-magnifying-glass search-icon"></i>
         <input v-model="searchQuery" class="search-input" placeholder="Buscar por nombre..." />

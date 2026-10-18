@@ -1,5 +1,6 @@
 <style scoped lang="scss" src="./UserManagement.scss"/>
 <script setup lang="ts">
+import { vStickyBar } from '../../../directives/stickyBar';
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import TableComponent from '../../Tables/TableComponent.vue';
 import UserListCard from './UserListCard.vue';
@@ -60,7 +61,7 @@ const navItems = ['estado', 'battletag', 'rol', 'personajes', 'acciones'];
 
 <template>
   <div class="ul-container">
-    <div class="search-bar">
+    <div class="search-bar" v-sticky-bar>
       <div class="search-wrap">
         <i class="fas fa-magnifying-glass search-icon"></i>
         <input v-model="searchQuery" class="search-input" placeholder="Buscar por battletag..." />

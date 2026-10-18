@@ -1,5 +1,6 @@
 <style scoped lang="scss" src="./ClanManagement.scss" />
 <script setup lang="ts">
+import { vStickyBar } from '../../../directives/stickyBar';
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import TableComponent from '../../Tables/TableComponent.vue';
 import ClanListCard from './ClanListCard.vue';
@@ -62,14 +63,14 @@ const navItems = ['estado', 'nombre', 'líder', 'oficiales', 'miembros', 'accion
 
 <template>
   <div class="ul-container">
-    <div class="button-list">
+    <div class="button-list" v-sticky-bar>
       <button class="btn-add" @click="showModal = true">
         <i class="fas fa-plus"></i>
         <span>Agregar clan</span>
       </button>
     </div>
 
-    <div class="search-bar">
+    <div class="search-bar" v-sticky-bar>
       <div class="search-wrap">
         <i class="fas fa-magnifying-glass search-icon"></i>
         <input v-model="searchQuery" class="search-input" placeholder="Buscar por nombre..." />
